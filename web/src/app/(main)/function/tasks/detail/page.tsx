@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 import { StatusBadge } from "@/components/status-badge";
 import { TaskLLMProfileChain } from "@/components/task-llm-profile-chain";
+import { TaskEmulatorPanel } from "@/components/task-emulator-panel";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -429,6 +430,7 @@ function TaskDetailInner() {
 
       {/* Tab content */}
       <div className="flex-1 p-4 lg:p-6">
+        <TaskEmulatorPanel taskId={id} />
         <TabsContent value="sessions" className="mt-0">
           <SessionsTab taskId={id} taskPaused={task?.status === "paused"} />
         </TabsContent>

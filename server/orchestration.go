@@ -169,9 +169,22 @@ func (s *Server) delegateToTask(ctx context.Context, in json.RawMessage, pick fu
 	if s.m.Assets() != nil {
 		tsx.SetAssetStore(s.m.Assets(), s.m.Assets().Companies())
 	}
+	tsx.SetTaskID(toolTaskID(t.ID))
+	tsx.SetEmulator(s.emulator)
 	tsx.SetNotify(t.Notify)         // generic wake-up (write ops without a dedicated callback go through it; no-op for read tools)
 	tsx.SetNotifyHint(t.NotifyHint) // add_hint → records an "orchestrator added N strategic hints: ..." entry and wakes the planner
 	return pick(tsx).Call(ctx, inner, nil)
+}
+
+// toolTaskID is the numeric PG task id for tool wiring, or 0 (unknown) when the
+// manager's task id is not numeric. Tools treat 0 as "no task" rather than
+// guessing.
+func toolTaskID(id string) int64 {
+	n, err := strconv.ParseInt(strings.TrimSpace(id), 10, 64)
+	if err != nil {
+		return 0
+	}
+	return n
 }
 
 // --- tools ---

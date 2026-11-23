@@ -95,6 +95,7 @@ import type {
   TaskNode,
   TaskScopeRow,
   TaskTemplate,
+  EmulatorStatus,
   TokenTotal,
   TokenUsage,
   Tool,
@@ -277,6 +278,9 @@ export const api = {
   tasks: () =>
     get<{ tasks: Task[]; active: string }>("/tasks").then((r) => ({ tasks: arr(r.tasks), active: r.active ?? "" })),
   task: (id: string) => get<Task>(`/tasks/${encodeURIComponent(id)}`),
+  emulator: (id: string) => get<EmulatorStatus>(`/tasks/${encodeURIComponent(id)}/emulator`),
+  startEmulator: (id: string) => post<EmulatorStatus>(`/tasks/${encodeURIComponent(id)}/emulator/start`, {}),
+  stopEmulator: (id: string) => post<EmulatorStatus>(`/tasks/${encodeURIComponent(id)}/emulator/stop`, {}),
   createTask: (input: {
     name?: string;
     categoryId?: number;

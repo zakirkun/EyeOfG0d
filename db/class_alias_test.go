@@ -15,7 +15,13 @@ func TestCanonicalVulnClassFoldsSpellings(t *testing.T) {
 		{"  SQL  Injection  ", "sql_injection"},
 		{"XSS", "xss"},
 		{"cross_site_scripting", "xss"},
-		{"RCE", "command_injection"},
+		// "rce" is claimed by two classes in the corpus (command_injection via a
+		// signal keyword, code_execution via an ontology synonym), so the
+		// derivation drops it as ambiguous and it stays literal. knowledge.Class
+		// agrees, which is why the table is generated rather than hand-authored:
+		// a hand-written guess here would disagree with the corpus.
+		{"RCE", "rce"},
+		{"remote code execution", "command_injection"},
 		{"LFI", "lfi"}, // lfi is its own class in the corpus, not an alias of path_traversal
 		{"IDOR", "idor"},
 		{"SSRF", "ssrf"},
@@ -69,12 +75,34 @@ func TestNoCanonicalIsAlsoAlias(t *testing.T) {
 	}
 }
 
-// The corpus defines 77 classes; guard against a truncated or mangled table.
+// The corpus defines the class vocabulary; guard against a truncated or mangled
+// table. The floors rise as the corpus grows (the MOBILE category added 15
+// classes and 57 aliases), so they track real counts rather than the old numbers.
 func TestCanonicalClassTableIsPopulated(t *testing.T) {
-	if len(canonicalVulnClasses) < 70 {
+	if len(canonicalVulnClasses) < 90 {
 		t.Fatalf("only %d canonical classes; table looks truncated", len(canonicalVulnClasses))
 	}
-	if len(vulnClassAliases) < 150 {
+	if len(vulnClassAliases) < 225 {
 		t.Fatalf("only %d aliases; table looks truncated", len(vulnClassAliases))
+	}
+}
+
+// Every Android class the APK analyser emits must be a real canonical class, or
+// a mobile finding would fall through to the unknown-class fallback and group
+// differently from run to run.
+func TestMobileClassesAreCanonical(t *testing.T) {
+	for _, class := range []string{
+		"exported_component", "insecure_deep_link", "unverified_app_link",
+		"cleartext_traffic", "backup_enabled", "debuggable_app",
+		"weak_signing_scheme", "debug_signing_certificate", "unsigned_apk",
+		"self_signed_certificate", "overpermissive_provider", "hardcoded_secret",
+		"overprivileged_app", "native_code_present", "no_code_obfuscation",
+	} {
+		if !canonicalVulnClasses[class] {
+			t.Errorf("mobile class %q is not canonical", class)
+		}
+		if got := canonicalVulnClass(class); got != class {
+			t.Errorf("canonicalVulnClass(%q) = %q, want it unchanged", class, got)
+		}
 	}
 }

@@ -3,6 +3,8 @@
 
 export type TaskStatus = "created" | "queued" | "running" | "paused" | "done" | "failed" | "timeout";
 export type EngineMode = "exploring" | "paused" | "stalled" | "idle";
+export type EmulatorState = "disabled" | "unavailable" | "starting" | "booting" | "ready" | "stopping" | "stopped" | "failed";
+export interface EmulatorStatus { task_id: string; state: EmulatorState; reason?: string; progress?: number; updated_at?: string; generation?: number }
 
 export interface Task {
   id: string;
@@ -677,7 +679,8 @@ export type ActivityKind =
   | "usage" // live cumulative token usage (per model turn); not rendered
   | "llm_switch" // automatic/manual task-level LLM switch
   | "llm_failover" // task-level provider switch / chain exhaustion audit event
-  | "intercept_request"; // user-approval request from the intercept layer
+  | "intercept_request" // user-approval request from the intercept layer
+  | "emulator"; // task-scoped Android emulator lifecycle progress
 
 // ChatAttachment is an uploaded file: path is relative to the session/task working directory (the agent's CWD).
 export interface ChatAttachment {
@@ -700,6 +703,8 @@ export interface Activity {
   detail?: string;
   metadata?: {
     llm_transition?: LLMTransition;
+    emulator_state?: string;
+    progress?: number;
   };
   source_task_id?: string;
   inherited?: boolean;

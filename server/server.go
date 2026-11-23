@@ -148,6 +148,7 @@ type Server struct {
 	archiveWake chan struct{}
 	archiveWG   sync.WaitGroup
 	side        *sideQuestionState
+	emulator    *Emulator
 }
 
 // provEntry is a cached provider + its config for one LLM profile id.
@@ -184,6 +185,7 @@ func New(ctx context.Context, m *Manager, skillDir string, dataDir string, keyDi
 		provByProfile:  map[int64]*provEntry{},
 		taskAgents:     map[string]*taskAgentBundle{}, archiveWake: make(chan struct{}, 1),
 		loginLimit: newLoginLimiter(time.Now), pwdLimit: newLoginLimiter(time.Now)}
+	s.emulator = newEmulator(ctx, m.dir, func(t *Task, a db.Activity) { s.engine.emitActivity(t, a) })
 	s.llmHealth, s.llmHealthSync = newLLMHealthRegistry(ctx, m.pg)
 	for _, o := range opts {
 		o(s)
@@ -763,6 +765,15 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("PATCH /api/task-templates/{id}", s.pgUpdateTaskTemplate)
 	mux.HandleFunc("DELETE /api/task-templates/{id}", s.pgDeleteTaskTemplate)
 	mux.HandleFunc("GET /api/tasks/{id}", s.getTask)
+	mux.HandleFunc("GET /api/tasks/{id}/emulator", s.emulatorStatus)
+	mux.HandleFunc("POST /api/tasks/{id}/emulator/start", s.emulatorStart)
+	mux.HandleFunc("POST /api/tasks/{id}/emulator/stop", s.emulatorStop)
+	// Dynamic mobile testing against the task's emulator. Authenticated like
+	// every other task route; the sidecar validates each field.
+	mux.HandleFunc("POST /api/tasks/{id}/emulator/install", s.emulatorInstall)
+	mux.HandleFunc("POST /api/tasks/{id}/emulator/launch", s.emulatorLaunch)
+	mux.HandleFunc("GET /api/tasks/{id}/emulator/logs", s.emulatorLogs)
+	mux.HandleFunc("GET /api/tasks/{id}/emulator/packages", s.emulatorPackages)
 	mux.HandleFunc("GET /api/tasks/{id}/outcome", s.taskOutcome)
 	mux.HandleFunc("GET /api/tasks/{id}/lessons", s.taskLessons)
 	mux.HandleFunc("POST /api/tasks/{id}/lessons/extract", s.extractTaskLessons)

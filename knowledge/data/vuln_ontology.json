@@ -154,6 +154,41 @@
       ],
       "escalation_targets": ["CODE_EXECUTION", "ACCESS_CONTROL"],
       "dedup_key_fields": ["package_name", "version", "attack_vector"]
+    },
+
+    "MOBILE": {
+      "parent": "CWE-919",
+      "children": [
+        "EXPORTED_COMPONENT",
+        "INSECURE_DEEP_LINK",
+        "UNVERIFIED_APP_LINK",
+        "CLEARTEXT_TRAFFIC",
+        "BACKUP_ENABLED",
+        "DEBUGGABLE_APP",
+        "WEAK_SIGNING_SCHEME",
+        "DEBUG_SIGNING_CERTIFICATE",
+        "UNSIGNED_APK",
+        "SELF_SIGNED_CERTIFICATE",
+        "OVERPERMISSIVE_PROVIDER",
+        "HARDCODED_SECRET",
+        "OVERPRIVILEGED_APP",
+        "NATIVE_CODE_PRESENT",
+        "NO_CODE_OBFUSCATION"
+      ],
+      "synonyms": [
+        "mobile", "android", "apk", "ios", "ipa", "app store",
+        "exported", "deeplink", "deep link", "intent", "content provider",
+        "manifest", "obfuscation", "tampering", "repackaging"
+      ],
+      "regex_signals": [
+        {"pattern": "(android:exported\\s*=\\s*\"true\"|<(activity|service|receiver|provider)[^>]*exported)", "label": "EXPORTED_COMPONENT", "weight": 0.8},
+        {"pattern": "(usesCleartextTraffic\\s*=\\s*\"true\"|android:usesCleartextTraffic)", "label": "CLEARTEXT_TRAFFIC", "weight": 0.85},
+        {"pattern": "(android:debuggable\\s*=\\s*\"true\"|android:allowBackup\\s*=\\s*\"true\")", "label": "DEBUGGABLE_APP", "weight": 0.85},
+        {"pattern": "(<data[^>]*android:scheme\\s*=\\s*\"(http|https|[a-z][a-z0-9+.-]*)\")", "label": "INSECURE_DEEP_LINK", "weight": 0.7},
+        {"pattern": "(grantUriPermissions\\s*=\\s*\"true\"|android:authorities\\s*=)", "label": "OVERPERMISSIVE_PROVIDER", "weight": 0.75}
+      ],
+      "escalation_targets": ["DATA_EXPOSURE", "ACCESS_CONTROL", "CODE_EXECUTION"],
+      "dedup_key_fields": ["package_name", "component", "manifest_element"]
     }
   },
 

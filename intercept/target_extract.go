@@ -29,6 +29,15 @@ var noTargetTools = toolSet(
 	"insert_assets", "add_company_scope", "add_task_scope", "list_assets",
 	"list_untested_assets", "list_companies", "report_finding", "record_fact",
 	"save_task_credential", "list_task_credentials", "ingest_bbot", "ingest_scan_output", "record_coverage",
+	// mobile analysis operates on operator-supplied packages and local script parameters
+	"analyze_apk", "build_frida_script",
+	// emulator operations act on a private device, never on a network connection
+	// made by the platform: install uploads local bytes, launch hands an intent to
+	// the device's own `am`, logcat and the package list are reads. A `data` URI in
+	// an intent is data for the app under test inside the emulator, not a target
+	// this process dials, so scanning it would only invent a target the gate cannot
+	// and should not police. The emulator's own network is outside this gate.
+	"install_target_apk", "launch_component", "read_logcat", "list_emulator_packages",
 	// cross-task orchestration, findings and retests (server)
 	"list_tasks", "list_llm_profiles", "spawn_task", "pause_task", "get_task_graph",
 	"list_task_findings", "add_task_hint", "get_task_worker_trace",

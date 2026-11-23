@@ -40,6 +40,9 @@ type Planner struct {
 	noaEnabledFn      func() bool                            // resolver: use experimental noa compaction? (nil = off)
 	maxTokensFn       func() int                             // resolver: per-reply output cap (nil/0 = send no cap)
 	compactor         *Compactor                             // cold-node compaction (§7); nil = disabled
+	// emulator, if set, is this task's running Android device for the dynamic
+	// mobile stage. nil = the optional emulator profile is off.
+	emulator AndroidEmulator
 	// lessonsBlock is the raw RSI evidence block. Empty = off. Plan() frames it
 	// with a per-run data envelope (field=lessons) and appends it after the
 	// rendered system prompt. The server renders the text from outcome records.
@@ -56,6 +59,10 @@ type Planner struct {
 func NewPlanner(prov llm.Provider, model, workDir string, tx *transcript.Store, window, maxTurns int) *Planner {
 	return &Planner{prov: prov, model: model, workDir: workDir, tx: tx, window: window, maxTurns: maxTurns, todos: map[int64]*actool.TodoStore{}}
 }
+
+// SetEmulator wires the dynamic Android surface into the ToolSets this planner
+// builds for each round.
+func (p *Planner) SetEmulator(e AndroidEmulator) { p.emulator = e }
 
 func (p *Planner) SetCompactionWindowResolver(fn func() int) { p.windowFn = fn }
 
@@ -479,6 +486,7 @@ func (p *Planner) Plan(ctx context.Context, taskID int64, as *db.AssetStore, ts 
 	}
 	tsx.SetTaskID(taskID)
 	tsx.SetCoverageEnabled(coverageOn(as, taskID))
+	tsx.SetEmulator(p.emulator)
 	tsx.killWork = p.killWork   // enable kill_work tool (nil = unavailable)
 	tsx.steerWork = p.steerWork // enable steer_work tool (nil = unavailable)
 	if origin, _ := ts.OriginFactID(); origin > 0 {

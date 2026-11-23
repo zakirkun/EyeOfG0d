@@ -189,6 +189,127 @@ RUN npm install -g "@playwright/mcp@${PLAYWRIGHT_MCP_VERSION}" "@playwright/cli@
     && playwright install --with-deps chromium \
     && "$(npm root -g)/@playwright/mcp/node_modules/.bin/playwright-core" install chromium \
     && rm -rf /var/lib/apt/lists/*
+
+# ---- Mobile (Android) toolchain -------------------------------------------
+# The static half of the apk flow (docs/mobile-apk-flow.md) is pure Go and needs
+# none of this. These are the tools the operator - or an agent through Bash -
+# reaches for once the static pass has named a component worth reading:
+#
+#   jadx      dex -> Java source; the tool used to read an exported component
+#   apktool   manifest/resources -> smali, for rebuilds and resource review
+#   aapt      manifest dump without a full decode
+#   apksigner reports and verifies the signing schemes
+#   adb       install, am start, content query: the dynamic entry point
+#   frida     CLI, plus frida-server binaries to push to a device
+#   ghidra    headless decompiler for the .so files a package ships
+#
+# Java is the awkward part. apktool/aapt/apksigner are exercised against 17 and
+# bookworm ships it, so that stays the shared runtime. Ghidra 12.2 requires a
+# full JDK 25, which bookworm does not carry (it is in trixie and later), so
+# Temurin 25 is installed alongside and pointed at by Ghidra's own
+# JAVA_HOME_OVERRIDE. Two JDKs is deliberate: putting every Android tool on 25
+# would move them onto a runtime none of them were tested against.
+#
+# Every download is checksum-pinned from its publisher's release metadata, the
+# same way the recon binaries above are. Nothing is fetched at runtime, so an
+# air-gapped deployment keeps the whole toolchain.
+
+ARG JADX_VERSION=1.5.7
+ARG JADX_SHA256=1755e4242ade71a077438723689f404079592ec7764a3a0572f98fef94ebcbf3
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      openjdk-17-jre-headless adb zipalign apktool aapt apksigner \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+    curl -fsSL "https://github.com/skylot/jadx/releases/download/v${JADX_VERSION}/jadx-${JADX_VERSION}.zip" \
+      -o /tmp/jadx.zip; \
+    got="$(sha256sum /tmp/jadx.zip | cut -d' ' -f1)"; \
+    if [ "$got" != "$JADX_SHA256" ]; then echo "jadx checksum mismatch: want $JADX_SHA256 got $got" >&2; exit 1; fi; \
+    mkdir -p /opt/jadx; \
+    unzip -q /tmp/jadx.zip -d /opt/jadx; \
+    chmod +x /opt/jadx/bin/jadx; \
+    ln -sf /opt/jadx/bin/jadx /usr/local/bin/jadx; \
+    rm -f /tmp/jadx.zip; \
+    jadx --version; apktool --version; aapt version; apksigner version; adb version
+
+# frida-tools provides the `frida`, `frida-ps` and `frida-trace` CLIs. The
+# matching frida-server binaries are unpacked into the image so a device can be
+# instrumented without the container reaching the network: arm64 covers real
+# handsets, x86_64 covers emulators.
+ARG FRIDA_TOOLS_VERSION=14.13.2
+ARG FRIDA_SERVER_VERSION=17.27.4
+ARG FRIDA_SERVER_ARM64_SHA256=a2007a0f3a8bcbbc3ee165b5d7904970a59b2a769310d751d68cfa405145432f
+ARG FRIDA_SERVER_X86_64_SHA256=e30e8d8dcefa6d8b78b5b6a613b42c102d5dfa0e0e47ac7ce27590dc8f05a4db
+
+RUN set -eux; \
+    pip install --no-cache-dir --break-system-packages "frida-tools==${FRIDA_TOOLS_VERSION}"; \
+    mkdir -p /opt/frida-server; \
+    fetch_server() { arch="$1"; want="$2"; \
+      url="https://github.com/frida/frida/releases/download/${FRIDA_SERVER_VERSION}/frida-server-${FRIDA_SERVER_VERSION}-android-${arch}.xz"; \
+      curl -fsSL "$url" -o "/tmp/fs-${arch}.xz"; \
+      got="$(sha256sum "/tmp/fs-${arch}.xz" | cut -d' ' -f1)"; \
+      if [ "$got" != "$want" ]; then echo "frida-server ${arch} checksum mismatch: want $want got $got" >&2; exit 1; fi; \
+      xz -d -c "/tmp/fs-${arch}.xz" > "/opt/frida-server/frida-server-android-${arch}"; \
+      chmod +x "/opt/frida-server/frida-server-android-${arch}"; \
+      rm -f "/tmp/fs-${arch}.xz"; \
+    }; \
+    fetch_server arm64 "$FRIDA_SERVER_ARM64_SHA256"; \
+    fetch_server x86_64 "$FRIDA_SERVER_X86_64_SHA256"; \
+    frida --version; ls -l /opt/frida-server
+
+# Ghidra, headless only. Two constraints shape this block:
+#
+#   1. It needs a full JDK 25, not a JRE. Ghidra's launcher runs in "jdk" mode
+#      and refuses a bare runtime, which is why Temurin is installed rather than
+#      a second apt JRE.
+#   2. The official release zip ships native decompiler binaries for
+#      linux_x86_64 and win_x86_64 only. On arm64 the Java side imports and
+#      disassembles but every decompile fails, because the decompiler is a
+#      separate native process. Building it from source on arm64 needs clang and
+#      a matching source tag, so arm64 builds skip Ghidra and say so instead of
+#      installing something that half-works.
+#
+# INSTALL_GHIDRA=false skips the roughly 700 MB download and 1.7 GB installed
+# footprint; the rest of the mobile toolchain is unaffected.
+ARG INSTALL_GHIDRA=true
+ARG GHIDRA_VERSION=12.2
+ARG GHIDRA_ZIP=ghidra_12.2_PUBLIC_20261016.zip
+ARG GHIDRA_SHA256=2c2cd776db3c1f6a097ba418922378ac3649cadd5e844a6f5f088ae628a7be67
+ARG JDK25_VERSION=25.0.5.1_2
+# The release tag spells the build number with a plus, which must be percent
+# encoded in the URL, while the asset filename keeps the underscore.
+ARG JDK25_TAG=jdk-25.0.5.1%2B2
+ARG JDK25_SHA256=760f91b22c3efc9bd1b64ff950598231be82928cc807e30691a0e7a2995a62c0
+
+RUN set -eux; \
+    if [ "${INSTALL_GHIDRA}" != "true" ]; then \
+      echo "Ghidra skipped (INSTALL_GHIDRA=${INSTALL_GHIDRA})"; exit 0; \
+    fi; \
+    if [ "${TARGETARCH:-amd64}" != "amd64" ]; then \
+      echo "Ghidra skipped: the release ships no linux_${TARGETARCH} native decompiler"; exit 0; \
+    fi; \
+    jdk_url="https://github.com/adoptium/temurin25-binaries/releases/download/${JDK25_TAG}/OpenJDK25U-jdk_x64_linux_hotspot_${JDK25_VERSION}.tar.gz"; \
+    curl -fsSL "$jdk_url" -o /tmp/jdk25.tar.gz; \
+    got="$(sha256sum /tmp/jdk25.tar.gz | cut -d' ' -f1)"; \
+    if [ "$got" != "$JDK25_SHA256" ]; then echo "JDK25 checksum mismatch: want $JDK25_SHA256 got $got" >&2; exit 1; fi; \
+    mkdir -p /opt/jdk-25; \
+    tar -xzf /tmp/jdk25.tar.gz -C /opt/jdk-25 --strip-components=1; \
+    rm -f /tmp/jdk25.tar.gz; \
+    curl -fsSL "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${GHIDRA_VERSION}_build/${GHIDRA_ZIP}" \
+      -o /tmp/ghidra.zip; \
+    got="$(sha256sum /tmp/ghidra.zip | cut -d' ' -f1)"; \
+    if [ "$got" != "$GHIDRA_SHA256" ]; then echo "ghidra checksum mismatch: want $GHIDRA_SHA256 got $got" >&2; exit 1; fi; \
+    unzip -q /tmp/ghidra.zip -d /tmp/ghidra-unpack; \
+    mv /tmp/ghidra-unpack/ghidra_*_PUBLIC /opt/ghidra; \
+    rm -rf /tmp/ghidra.zip /tmp/ghidra-unpack; \
+    chmod +x /opt/ghidra/support/analyzeHeadless; \
+    ln -sf /opt/ghidra/support/analyzeHeadless /usr/local/bin/analyzeHeadless; \
+    printf 'JAVA_HOME_OVERRIDE=/opt/jdk-25\n' >> /opt/ghidra/support/launch.properties; \
+    /opt/jdk-25/bin/java -version; \
+    test -x /opt/ghidra/Ghidra/Features/Decompiler/os/linux_x86_64/decompile; \
+    echo "ghidra ${GHIDRA_VERSION} installed at /opt/ghidra"
+
 WORKDIR /app
 # Binary compiled from source in the build stage above.
 COPY --from=build /out/artex /app/artex

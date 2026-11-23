@@ -695,6 +695,18 @@ func (t *ToolSet) WorkerTools() []actool.CoreTool {
 		t.ingestBbot(),
 		// scanner output (nmap -oX) by path, without the raw output.
 		t.ingestScanOutput(),
+		// Android package analysis: static manifest, signing and credential
+		// facts for an APK in the workspace. Read-only, so a worker can call it
+		// without widening the task's blast radius.
+		t.analyzeAPK(),
+		// Frida script rendering: deterministic instrumentation for a device that
+		// the worker reaches through Bash. Read-only; it builds a script, never
+		// runs one.
+		t.buildFridaScript(),
+		// Dynamic mobile stage: reach the task's running emulator to install the
+		// target and prove an exported component. Every one of these reports a
+		// clear "no emulator" result when the optional profile is absent.
+		t.installTargetAPK(), t.launchComponent(), t.readLogcat(), t.listEmulatorPackages(),
 		// Task credentials (#3): reuse user-declared test accounts, record
 		// self-registered ones so they are not forgotten.
 		t.saveTaskCredential(), t.listTaskCredentials(),
@@ -737,6 +749,12 @@ func (t *ToolSet) MainAgentTools() []actool.CoreTool {
 		// list_untested_assets: query untested assets in this task's scope on demand
 		// (by type + paginated), and decide on supplementary testing yourself.
 		t.listUntestedAssets(),
+		// analyze_apk: inspect an Android package the operator supplied.
+		t.analyzeAPK(),
+		// build_frida_script: render instrumentation for the dynamic stage.
+		t.buildFridaScript(),
+		// Dynamic mobile stage against the task's emulator.
+		t.installTargetAPK(), t.launchComponent(), t.readLogcat(), t.listEmulatorPackages(),
 	}
 }
 

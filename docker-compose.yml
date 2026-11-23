@@ -50,6 +50,9 @@ services:
       ARTEX_TASK_BUDGET_TURNS: ${ARTEX_TASK_BUDGET_TURNS:-}
       ARTEX_INTENT_BUDGET_TOKENS: ${ARTEX_INTENT_BUDGET_TOKENS:-}
       ARTEX_INTENT_BUDGET_TURNS: ${ARTEX_INTENT_BUDGET_TURNS:-}
+      # Optional Android runtime capability. It remains disabled unless explicitly enabled;
+      # the backend still requires native Linux with /dev/kvm and never exposes ADB ports.
+      ARTEX_EMULATOR_ENABLED: ${ARTEX_EMULATOR_ENABLED:-0}
     ports:
       - "${ARTEX_BIND_ADDR:-127.0.0.1}:8787:8787"
       - "127.0.0.1:8788:8788"
@@ -65,5 +68,44 @@ services:
       - ./skills:/app/skills
     restart: unless-stopped
 
+  # Explicit opt-in only: a real QEMU-backed Android Emulator sidecar.
+  #
+  # This service is intentionally private. It exposes only its fixed HTTP
+  # lifecycle contract to artex on the internal network: no published ports, no
+  # Docker socket, no ARTEX keys or workspace. ADB (5555) and the emulator
+  # console (5554) stay inside the container.
+  #
+  # Requirements are real, not advisory:
+  #   - linux/amd64 host with hardware virtualisation enabled (VT-x / AMD-V)
+  #   - a usable /dev/kvm on the host, readable/writable by the container user
+  #   - ~8 GB free disk for the SDK, system image and task AVD
+  #   - several GB RAM available to the emulator
+  # Windows/macOS Docker Desktop cannot satisfy this and will fail closed.
+  emulator:
+    profiles: ["emulator"]
+    platform: linux/amd64
+    build:
+      context: ./sidecar
+    image: artex-emulator:local
+    networks: [default]
+    devices:
+      - /dev/kvm:/dev/kvm
+    # If the host's /dev/kvm is not world-writable, map its group so the
+    # unprivileged container user can use it, e.g. `group_add: ["109"]`.
+    # No privileged mode, no added capabilities.
+    environment:
+      EMULATOR_STATE_DIR: /var/lib/artex-emulator
+    volumes:
+      # Task AVD homes and durable lifecycle snapshots. AVD directories are
+      # removed on stop/failure; the volume only bounds transient state.
+      - emulator-state:/var/lib/artex-emulator
+    tmpfs:
+      - /tmp:size=1g
+    shm_size: 2gb
+    mem_limit: 6g
+    cpus: 4
+    restart: unless-stopped
+
 volumes:
   pgdata:
+  emulator-state:

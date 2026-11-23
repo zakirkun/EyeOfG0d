@@ -34,7 +34,16 @@ type MainAgent struct {
 	nonStreamingFn  func() bool                            // resolver: use non-streaming (Complete) path? (nil = streaming)
 	noaEnabledFn    func() bool                            // resolver: use experimental noa compaction? (nil = off)
 	maxTokensFn     func() int                             // resolver: per-reply output cap (nil/0 = send no cap)
+	// emulator, if set, is this task's running Android device for the dynamic
+	// mobile stage. nil = the optional emulator profile is off, and the emulator
+	// tools say so instead of failing.
+	emulator AndroidEmulator
 }
+
+// SetEmulator wires the dynamic Android surface into every ToolSet this agent
+// builds. Without it the mobile emulator tools would always report that no
+// device is ready, even on a host that runs one.
+func (m *MainAgent) SetEmulator(e AndroidEmulator) { m.emulator = e }
 
 // SetNoaEnabled wires a resolver deciding whether runs use the experimental noa
 // context-compression mechanism. nil/unset = off (built-in compaction). Read per
@@ -119,6 +128,7 @@ func (m *MainAgent) Chat(ctx context.Context, taskID int64, mainSeg int, as *db.
 	}
 	tsx.SetTaskID(taskID)
 	tsx.SetCoverageEnabled(coverageOn(as, taskID))
+	tsx.SetEmulator(m.emulator)
 	tsx.SetNotify(notify)         // generic wake-up (write ops without a dedicated callback go through it, debounced)
 	tsx.SetResumeTask(resume)     // set_goals adds a goal → pull a completed/paused task back to running
 	tsx.SetNotifyGoal(notifyGoal) // set_goals adds a goal → record a "human added a goal: …" trigger for the planner

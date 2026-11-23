@@ -195,7 +195,16 @@ type ToolSet struct {
 	// Wired for the main agent + cross-task orchestration; nil elsewhere → falls back
 	// to the bare notify.
 	notifyHint func(origin string, texts []string)
+	// emulator, if set, is the running Android device for this task (dynamic mobile
+	// testing). nil = the optional emulator profile is disabled or unavailable, and
+	// the emulator tools report that rather than failing obscurely.
+	emulator AndroidEmulator
 }
+
+// SetEmulator wires the task's dynamic Android surface. Called by the server when
+// it builds a ToolSet for a task; leaving it unset keeps every emulator tool
+// reporting "no emulator is ready" instead of erroring.
+func (t *ToolSet) SetEmulator(e AndroidEmulator) { t.emulator = e }
 
 // SetNotifyGoal wires the goal-add trigger callback (see ToolSet.notifyGoal). Set only
 // by the main-agent chat, so runtime-added goals are announced to the planner by name.

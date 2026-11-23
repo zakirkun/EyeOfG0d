@@ -811,6 +811,7 @@ func (s *Server) agentsForTask(t *Task) *taskAgentBundle {
 	wk.SetProxy(s.m.ProxyAddr(), s.m.ProxyCACert())
 	wk.SetWebSearch(s.webSearchFor("worker"))
 	wk.SetConstraintInject(s.constraintInjectWorker) // operation-constraint injection into the worker (configurable, on by default)
+	wk.SetEmulator(s.emulator)
 	pl := agent.NewPlanner(plannerRuntime, "task-router", s.m.dir, tx, plannerRuntime.CompactionWindow(), s.agentMaxTurns("planner"))
 	pl.SetFindingRecorder(s.evidenceStore())
 	pl.SetCompactionWindowResolver(plannerRuntime.CompactionWindow)
@@ -822,6 +823,7 @@ func (s *Server) agentsForTask(t *Task) *taskAgentBundle {
 	pl.SetProxy(s.m.ProxyAddr(), s.m.ProxyCACert())
 	pl.SetWebSearch(s.webSearchFor("planner"))
 	pl.SetConstraintInject(s.constraintInjectPlanner) // operation-constraint injection into the planner (configurable, on by default)
+	pl.SetEmulator(s.emulator)
 	// cold-digest §7: background compaction of cold nodes. This per-task planner set
 	// (agentsForTask) is exactly what the engine actually drives through the authoritative
 	// resolver, so the Compactor must hook in here. The planner provider goes through task routing (§4: same model as the agent, resolved with the task's LLM chain); compaction uses Complete to generate the body in one shot.
@@ -838,6 +840,7 @@ func (s *Server) agentsForTask(t *Task) *taskAgentBundle {
 	main.SetProxy(s.m.ProxyAddr(), s.m.ProxyCACert())
 	main.SetWebSearch(s.webSearchFor("mainagent"))
 	main.SetSteerWork(s.engine.SteerWork) // steer_work: real-time course correction on running work by a human
+	main.SetEmulator(s.emulator)
 	bundle := &taskAgentBundle{
 		runtime: goalRuntime, plannerRuntime: plannerRuntime, workerRuntime: workerRuntime,
 		mainRuntime: mainRuntime, pl: pl, wk: wk, main: main,

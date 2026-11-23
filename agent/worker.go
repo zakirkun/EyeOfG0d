@@ -82,6 +82,9 @@ type Worker struct {
 	// injected into the worker system prompt. Read per run so the settings toggle
 	// takes effect without rebuilding the agent. nil = inject (default).
 	injectConstraints func() bool
+	// emulator, if set, is this task's running Android device for the dynamic
+	// mobile stage. nil = the optional emulator profile is off.
+	emulator AndroidEmulator
 	// nonStreamingFn resolves whether this run uses the non-streaming (Complete)
 	// path. Read per run so a profile/task toggle takes effect without rebuilding
 	// the agent. nil = streaming (default).
@@ -149,6 +152,10 @@ func (w *Worker) maxTokens() int {
 // SetConstraintInject wires a resolver deciding whether this task's operation
 // constraints get injected into the worker system prompt. nil = inject (default).
 func (w *Worker) SetConstraintInject(fn func() bool) { w.injectConstraints = fn }
+
+// SetEmulator wires the dynamic Android surface into every ToolSet this worker
+// builds. Without it the emulator tools always report that no device is ready.
+func (w *Worker) SetEmulator(e AndroidEmulator) { w.emulator = e }
 
 // SetLessonsBlock sets the raw RSI evidence block. Empty disables it. Execute()
 // frames it as data. The server renders it from outcome records; it is never
@@ -427,6 +434,7 @@ func (w *Worker) execute(ctx context.Context, name string, taskID int64, as *db.
 	tsx := NewToolSet(ts, name)
 	tsx.SetFindingRecorder(w.findingRecorder)
 	tsx.SetTaskID(taskID)
+	tsx.SetEmulator(w.emulator)
 	coverageEnabled := coverageOn(as, taskID)
 	tsx.SetCoverageEnabled(coverageEnabled)
 	if as != nil {
