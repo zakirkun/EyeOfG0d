@@ -145,16 +145,23 @@ comparing the digest before it was trusted.
 Two details matter for reproducibility:
 
 - Google attests **SHA-256** for the command-line tools and **SHA-1** for the
-  emulator, platform-tools, and system images, so each artifact is verified with
-  the algorithm upstream actually publishes.
+  emulator, platform-tools, and system images. The command-line tools digest is
+  checked by the Dockerfile directly (`sha256sum` against the pinned value,
+  before unpacking). The other three are checked by `sdkmanager` while
+  downloading, against the digests in the repository metadata it fetches; this
+  image does not re-verify them itself.
 - The command-line tools are pinned by URL and unpacked directly. The emulator,
   platform-tools, and system image are installed through `sdkmanager` from the
   stable channel (`--channel=0`), because `avdmanager` and the emulator require
   the package metadata that `sdkmanager` registers. Unpacking those archives by
-  hand produces an SDK that `avdmanager` cannot resolve. The build then asserts
-  the installed `Pkg.Revision` of each package, the API level, ABI, and tag, and
-  fails if any of them differ, so a channel advance cannot silently change the
-  runtime.
+  hand produces an SDK that `avdmanager` cannot resolve.
+
+Because metadata-checked downloads could in principle resolve to a different
+build, the pinning guarantee does not rest on the digests alone: the build
+asserts the installed `Pkg.Revision` of each package, plus the system image's
+API level, ABI, and tag, and fails if any of them differ, so a channel advance
+cannot silently change the runtime. The `sha1` values in the table are recorded
+for audit and were confirmed by downloading each archive during this change.
 
 Two build-time behaviours are known and are handled explicitly rather than
 assumed, because both were observed on a real build of this image:
