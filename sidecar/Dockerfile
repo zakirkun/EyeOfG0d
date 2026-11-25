@@ -199,9 +199,31 @@ RUN set -eux; \
     /usr/sbin/groupadd -g 61050 artex; \
     /usr/sbin/useradd -u 61050 -g 61050 -m -d /var/lib/artex-emulator -s /usr/sbin/nologin artex; \
     mkdir -p "${ANDROID_USER_HOME}" "${ANDROID_SDK_ROOT}/.android" /var/lib/artex-emulator/tasks; \
-    chown -R artex:artex "${ANDROID_USER_HOME}" /var/lib/artex-emulator "${ANDROID_SDK_ROOT}/.android"
+    chown -R artex:artex "${ANDROID_USER_HOME}" /var/lib/artex-emulator "${ANDROID_SDK_ROOT}/.android"; \
+    # The build-time assertions above ran `emulator -version` as root, which
+    # creates a root-owned /tmp/android-unknown (mode 0744). At run time the
+    # unprivileged user cannot stat or mkdir inside it and the emulator prints
+    # "Permission denied" for its crash database on every invocation. Compose
+    # mounts a tmpfs over /tmp that hides this, but the image itself must not
+    # depend on that: remove the directory here, and assert below that a fresh
+    # non-root invocation can write to /tmp.
+    rm -rf /tmp/android-unknown; \
+    test ! -e /tmp/android-unknown
 
 COPY --from=build /out/emulator-sidecar /app/emulator-sidecar
+
+# Assert the runtime user can actually use the SDK. This is the check whose
+# absence let a root-owned /tmp/android-unknown ship: the earlier assertions all
+# ran as root, so they could not see a permission problem that only affects the
+# unprivileged runtime user. `su` is available from the passwd package added
+# above (it installs /usr/bin/su on this image).
+RUN set -eux; \
+    su artex -s /bin/sh -c '"${ANDROID_SDK_ROOT}/emulator/emulator" -version' \
+        | grep -Fq "version ${EMULATOR_REVISION}"; \
+    su artex -s /bin/sh -c 'test -w /tmp'; \
+    su artex -s /bin/sh -c 'test -w "${EMULATOR_STATE_DIR}"'; \
+    su artex -s /bin/sh -c '"${ANDROID_SDK_ROOT}/platform-tools/adb" version' \
+        | grep -Fq 'Android Debug Bridge'
 
 USER artex
 EXPOSE 8090
