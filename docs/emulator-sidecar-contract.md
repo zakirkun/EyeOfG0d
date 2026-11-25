@@ -74,14 +74,26 @@ mistake "no device" for "nothing found".
 - **Architecture: `linux/amd64` only.** The pinned system image is `x86_64`.
   ARM hosts are not supported and will not silently emulate x86_64.
 - **Native Linux with usable `/dev/kvm`.** Hardware virtualisation must be
-  enabled on the host. Docker Desktop on Windows/macOS does not provide this;
-  the profile fails closed there with a bounded reason.
+  enabled on the host. Docker Desktop on Windows/macOS does not provide it, and
+  there the failure happens *before* this program runs: the container is never
+  created, because the daemon cannot gather the declared device and exits with
+  `error gathering device information while adding custom device "/dev/kvm": no
+  such file or directory`. That is a Compose/Docker error, not a sidecar
+  `failed` state, and the backend never gets to ask.
+- If the container does start but KVM is unusable (a Linux host without the
+  module, or a VM without nested virtualisation), the sidecar *does* run and
+  reports `failed` with the bounded reason `KVM acceleration is unavailable`,
+  because its readiness check is `emulator -accel-check` rather than a device
+  lookup. Neither path ever yields `ready`.
 - Roughly 8 GB free disk for SDK + system image + task AVD, and several GB of
   RAM available to the emulator.
 
 The sidecar image also builds on a non-Linux host, but it can only *run* on
-Linux. On other platforms the supervisor's driver returns a fixed failure and
-never reports `ready`.
+Linux: it is `linux/amd64` only, and the runtime is QEMU plus `/dev/kvm`. The
+package keeps a `!linux` driver so its state machine and tests are
+platform-independent, and that driver returns a fixed failure rather than
+pretending an emulator exists — but the shipped image never executes it. Off
+Linux the practical failure is the container-creation error described above.
 
 ## Isolation and security boundary
 
