@@ -63,6 +63,23 @@ its own linux/amd64 sidecar image. `docker-compose.yml` explains the real
 requirements (native Linux, usable `/dev/kvm`, several GB RAM); Windows and
 macOS Docker Desktop cannot satisfy them and fail closed.
 
+Enabling it takes **two** steps, and both are required:
+
+```sh
+# 1. Build the sidecar image (pinned SDK, ~40 min the first time).
+docker compose --profile emulator build emulator
+
+# 2. Start it *and* switch the backend's capability on.
+ARTEX_EMULATOR_ENABLED=1 docker compose --profile emulator up -d
+```
+
+Starting the profile alone is not enough: `ARTEX_EMULATOR_ENABLED` defaults to
+`0`, which is what makes the backend report the capability as disabled and gives
+every dynamic tool a clean "no emulator" result. The flag is a deliberate second
+gate. A profile without the flag advertises a runtime the backend will not use;
+the flag without the profile points the backend at a sidecar that is not running,
+which surfaces as "sidecar is unreachable" rather than as a fake success.
+
 The default backend image still carries the mobile *static* toolchain only. The
 emulator is never installed mid-engagement, and a host without the profile gets a
 clean "no emulator is ready" answer from every dynamic tool rather than an

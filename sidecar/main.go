@@ -40,6 +40,20 @@ const (
 	bootTimeout = 6 * time.Minute
 	stopTimeout = 45 * time.Second
 
+	// Per-operation budgets. These are the authoritative limits; the HTTP
+	// server's transport timeouts below are derived from the largest of them,
+	// because ReadTimeout/WriteTimeout apply to the whole request and would
+	// otherwise sever a legitimate install mid-upload. An APK transfer plus
+	// `adb install` is easily minutes, so a 60s transport cap would break the
+	// one operation the dynamic surface exists for.
+	installTimeout  = 4 * time.Minute
+	launchTimeout   = 90 * time.Second
+	logsTimeout     = 60 * time.Second
+	packagesTimeout = 45 * time.Second
+	// maxRequestBudget is the worst case across all handlers; the transport
+	// timeouts are set from it so they can never be the binding constraint.
+	maxRequestBudget = installTimeout
+
 	reasonKVM     = "KVM acceleration is unavailable"
 	reasonAVD     = "Android AVD could not be prepared"
 	reasonStart   = "Android emulator process could not start"
@@ -154,14 +168,7 @@ func main() {
 	mux.HandleFunc("GET /v1/tasks/{id}/logs", s.logs)
 	mux.HandleFunc("GET /v1/tasks/{id}/packages", s.packages)
 
-	srv := &http.Server{
-		Addr:              listenAddr,
-		Handler:           mux,
-		ReadHeaderTimeout: 5 * time.Second,
-		ReadTimeout:       30 * time.Second,
-		WriteTimeout:      60 * time.Second,
-		IdleTimeout:       60 * time.Second,
-	}
+	srv := newHTTPServer(mux)
 
 	go func() {
 		sig := make(chan os.Signal, 1)
@@ -179,6 +186,25 @@ func main() {
 	}
 }
 
+// newHTTPServer builds the HTTP server with its transport timeouts.
+//
+// The transport timeouts must exceed the largest handler budget, or a
+// legitimate long operation is cut off by the server rather than by its own
+// deadline: ReadTimeout covers the full request body (an APK upload runs to
+// installTimeout) and WriteTimeout covers the response. Sizing them from
+// maxRequestBudget keeps that true if a budget is tuned later. This function
+// exists so a test can assert on the real server rather than on a copy.
+func newHTTPServer(h http.Handler) *http.Server {
+	return &http.Server{
+		Addr:              listenAddr,
+		Handler:           h,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       maxRequestBudget + 30*time.Second,
+		WriteTimeout:      maxRequestBudget + 30*time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+}
+
 func newSupervisor() *supervisor {
 	root := os.Getenv("EMULATOR_STATE_DIR")
 	if root == "" {
@@ -189,7 +215,7 @@ func newSupervisor() *supervisor {
 
 func validTaskID(id string) bool { return taskIDPattern.MatchString(id) }
 
-func (s *supervisor) taskDir(id string) string { return filepath.Join(s.root, "tasks", id) }
+func (s *supervisor) taskDir(id string) string   { return filepath.Join(s.root, "tasks", id) }
 func (s *supervisor) statePath(id string) string { return filepath.Join(s.taskDir(id), "state.json") }
 
 // clampReason keeps persisted reasons short and free of control characters.
@@ -558,7 +584,7 @@ func (s *supervisor) install(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(r.Context(), 4*time.Minute)
+	ctx, cancel := context.WithTimeout(r.Context(), installTimeout)
 	defer cancel()
 	result, err := s.drv.Install(ctx, apkPath)
 	if err != nil {
@@ -586,7 +612,7 @@ func (s *supervisor) launch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(r.Context(), 90*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), launchTimeout)
 	defer cancel()
 	result, opErr := s.drv.Launch(ctx, req)
 	if opErr != nil {
@@ -614,7 +640,7 @@ func (s *supervisor) logs(w http.ResponseWriter, r *http.Request) {
 		lines = 200
 	}
 
-	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), logsTimeout)
 	defer cancel()
 	result, err := s.drv.Logs(ctx, tag, lines)
 	if err != nil {
@@ -629,7 +655,7 @@ func (s *supervisor) packages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer s.endOp()
-	ctx, cancel := context.WithTimeout(r.Context(), 45*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), packagesTimeout)
 	defer cancel()
 	result, err := s.drv.Packages(ctx)
 	if err != nil {

@@ -4,6 +4,19 @@ The `emulator` Compose profile is opt-in and private. It runs a **real
 QEMU-backed Android Emulator** with a pinned Android Virtual Device (AVD), not
 a mock, health stub, or probing adapter.
 
+Enabling it is two steps, and both are required:
+
+```sh
+docker compose --profile emulator build emulator
+ARTEX_EMULATOR_ENABLED=1 docker compose --profile emulator up -d
+```
+
+`ARTEX_EMULATOR_ENABLED` defaults to `0`, so starting the profile without it
+leaves the backend reporting the capability as disabled while a real emulator
+runs and is never used. Conversely, setting the flag without starting the profile
+points the backend at a sidecar that is not running; that surfaces as
+"sidecar is unreachable", never as a fabricated success.
+
 ARTEX calls only the fixed service URL `http://emulator:8090` and the fixed
 endpoints:
 
@@ -184,6 +197,13 @@ Verified in this repository:
 - Dynamic-operation surface: typed intent validation (21 malformed/injection
   cases), fixed `am` argv construction, "never a shell", extras bounds, and the
   operation lock (a missing release deadlocks, and is tested).
+- Timeout budgets on **both** sides of the boundary. The backend client keeps
+  no blanket HTTP timeout (a 4s client timeout made every dynamic operation
+  report "sidecar is unreachable"; a test fails if it is restored). The sidecar's
+  transport deadlines are derived from the largest handler budget, because
+  `net/http` severs a request before the handler's context fires: the previous
+  30s read / 60s write pair would have truncated a 256 MiB upload and a
+  four-minute install. Both are guarded by tests that fail on the old values.
 - Real Linux driver cross-compiles and vets cleanly (`GOOS=linux GOARCH=amd64`).
 - The image's user/group step is proven against `debian:bookworm-slim` with the
   same pinned `PATH`: bare `groupadd` does not resolve, the absolute path does.
