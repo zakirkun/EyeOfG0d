@@ -22,8 +22,8 @@ func TestInterceptSourceMatchesJudgeWriter(t *testing.T) {
 	}
 }
 
-func TestInterceptSourceLegacyModelPrefix(t *testing.T) {
-	for _, reason := range []string{"[模型] 允许", "[Model] fixture"} {
+func TestInterceptSourceModelPrefixCase(t *testing.T) {
+	for _, reason := range []string{"[Model] fixture", "[MODEL] fixture", "[model] fixture"} {
 		if got := db.InterceptSource(0, reason); got != "model" {
 			t.Fatalf("%q classified as %q, want model", reason, got)
 		}

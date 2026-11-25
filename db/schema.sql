@@ -1116,14 +1116,19 @@ ALTER TABLE intercept_pending ADD COLUMN IF NOT EXISTS reason TEXT NOT NULL DEFA
 -- Detail payloads are lazy-loaded; NULL preserves the meaning of legacy history.
 ALTER TABLE intercept_pending ADD COLUMN IF NOT EXISTS audit JSONB;
 ALTER TABLE intercept_pending ADD COLUMN IF NOT EXISTS decision_source TEXT NOT NULL DEFAULT '';
+-- Mirrors isModelReason / approvalDecisionSource: lower() so any stored casing of the
+-- writer's '[model]' prefix classifies as 'model', not 'unknown'.
 UPDATE intercept_pending SET decision_source=CASE WHEN rule_id IS NOT NULL THEN 'rule'
- WHEN reason LIKE '[Model]%' THEN 'model' ELSE 'unknown' END WHERE decision_source='';
+ WHEN lower(reason) LIKE '[model]%' THEN 'model' ELSE 'unknown' END WHERE decision_source='';
 -- Judge decisions were stored as 'unknown' because the readers expected a capitalized
--- prefix while the judge wrote '[model]' (and '[模型]' before e233c02). Idempotent:
--- once corrected no row matches the WHERE clause again.
+-- prefix while the judge wrote '[model]'. lower() matches isModelReason and
+-- approvalDecisionSource, which both ignore case: a stored 'unknown' wins over that
+-- fallback (COALESCE sees a non-empty value), so a case-sensitive LIKE here would strand
+-- '[Model]' / '[MODEL]' rows as 'unknown' for good. Idempotent: once corrected no row
+-- matches the WHERE clause again.
 UPDATE intercept_pending SET decision_source='model'
  WHERE decision_source='unknown' AND rule_id IS NULL
-   AND (reason LIKE '[model]%' OR reason LIKE '[模型]%');
+   AND lower(reason) LIKE '[model]%';
 -- Actor that settled the request: '' (pending, or decided before this column
 -- existed) | human | rule | model | system. No backfill: readers fall back to
 -- decision_source for legacy rows instead of rewriting history.

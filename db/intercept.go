@@ -238,22 +238,20 @@ func scanInterceptApprovalRow(rows interface{ Scan(...any) error }, r *Intercept
 // (intercept.JudgeReason); readers derive decision_source='model' from it.
 const ModelReasonPrefix = "[model]"
 
-// legacyModelReasonPrefix is what the judge wrote before the UI translation (e233c02).
-const legacyModelReasonPrefix = "[模型]"
-
 // isModelReason reports whether reason was written by the model judge. The
 // comparison ignores case: readers used to expect "[Model]" while the writer
-// produced "[model]", so stored rows may carry either spelling.
+// produced "[model]", so stored rows may carry either spelling. The pre-e233c02
+// localized prefix is not recognized: it was dropped with the English cutover,
+// and such rows fall back to "unknown" rather than carrying a stale literal.
 func isModelReason(reason string) bool {
-	return strings.HasPrefix(strings.ToLower(reason), ModelReasonPrefix) ||
-		strings.HasPrefix(reason, legacyModelReasonPrefix)
+	return strings.HasPrefix(strings.ToLower(reason), ModelReasonPrefix)
 }
 
 // Keep legacy rows without decision_source consistent with their displayed source.
 // Mirrors isModelReason; PostgreSQL LIKE is case-sensitive and '[' is literal.
 const approvalDecisionSource = `COALESCE(NULLIF(ip.decision_source,''), CASE
  WHEN ip.rule_id IS NOT NULL THEN 'rule'
- WHEN lower(ip.reason) LIKE '` + ModelReasonPrefix + `%' OR ip.reason LIKE '` + legacyModelReasonPrefix + `%' THEN 'model' ELSE 'unknown' END)`
+ WHEN lower(ip.reason) LIKE '` + ModelReasonPrefix + `%' THEN 'model' ELSE 'unknown' END)`
 
 // decided_by is returned exactly as stored, never merged with decision_source:
 // rows decided before the column existed keep it empty, so the displayed value
