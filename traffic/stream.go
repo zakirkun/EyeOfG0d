@@ -15,9 +15,9 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/traffic/rewrite"
 	mproxy "github.com/lqqyt2423/go-mitmproxy/proxy"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/traffic/rewrite"
 )
 
 // Stream recording (WebSocket and Server-Sent Events). go-mitmproxy reports a

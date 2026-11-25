@@ -1,6 +1,7 @@
 ---
 name: ai-redteam
 description: "Testing LLM-backed systems: direct, indirect, and RAG-mediated prompt injection, system prompt leakage, guardrail bypass, and systematic harness method (garak, PyRIT). Index of 5 references for AI features in an authorized engagement."
+mcps: ScopeSentry, browser
 ---
 
 # AI red team (index)

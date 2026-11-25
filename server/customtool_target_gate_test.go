@@ -19,11 +19,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/intercept"
 	"github.com/Autumn-27/norma/llm"
 	actool "github.com/Autumn-27/norma/tool"
+	"github.com/zakirkun/EyeOfG0d/agent"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/intercept"
 )
 
 // Step 1.8: the targets the custom tools render. The hook reads the parameters
@@ -522,7 +522,7 @@ func TestDenyRuleWinsBeforeRenderedTarget(t *testing.T) {
 	if err := ic.SetEnabledTools(append(slices.Clone(prior), "probe_http")); err != nil {
 		t.Fatal(err)
 	}
-	const sentinel = "ARTEX_RENDERED_DENY_PROBE"
+	const sentinel = "EYEOFG0D_RENDERED_DENY_PROBE"
 	rule, err := pg.CreateInterceptRule("rendered deny probe", "tool_input", "string", sentinel, "deny", "", 1000000, true, false, 0, "deny")
 	if err != nil {
 		t.Fatal(err)

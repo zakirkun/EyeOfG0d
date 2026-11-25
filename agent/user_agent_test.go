@@ -32,7 +32,7 @@ func serveUA(t *testing.T, userAgent string) string {
 }
 
 func TestUserAgentHeaderSetWhenConfigured(t *testing.T) {
-	const want = "artex-test-agent/1.2.3"
+	const want = "eyeofg0d-test-agent/1.2.3"
 	if got := serveUA(t, want); got != want {
 		t.Fatalf("User-Agent = %q, want %q", got, want)
 	}

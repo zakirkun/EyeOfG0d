@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 // Pure: report_finding advertises counterevidence / confidence_rationale as

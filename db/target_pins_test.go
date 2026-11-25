@@ -79,7 +79,7 @@ func approveTarget(t *testing.T, d *DB, scope TargetScopeRef, host string, port 
 	if !created {
 		t.Fatalf("a request for %s:%d was already open", host, port)
 	}
-	pin, ok, err := d.ResolveTargetRequest(id, true, "ARTEX", "198.51.100.9")
+	pin, ok, err := d.ResolveTargetRequest(id, true, "EyeOfG0d", "198.51.100.9")
 	if err != nil || !ok || pin == nil {
 		t.Fatalf("approve %s:%d: pin=%+v ok=%v err=%v", host, port, pin, ok, err)
 	}
@@ -238,11 +238,11 @@ func TestTargetRequestNewRowAfterDecision(t *testing.T) {
 	if again, made := openTargetRequest(t, d, scope, "app.example.com", 443, "203.0.113.7"); made || again != first {
 		t.Fatalf("second call got id=%d created=%v, want to attach to %d", again, made, first)
 	}
-	if pin, ok, err := d.ResolveTargetRequest(first, false, "ARTEX", "198.51.100.9"); err != nil || !ok || pin != nil {
+	if pin, ok, err := d.ResolveTargetRequest(first, false, "EyeOfG0d", "198.51.100.9"); err != nil || !ok || pin != nil {
 		t.Fatalf("deny: pin=%+v ok=%v err=%v", pin, ok, err)
 	}
 	// A second decision on the same row is refused and changes nothing.
-	if _, ok, err := d.ResolveTargetRequest(first, true, "ARTEX", "198.51.100.9"); err != nil || ok {
+	if _, ok, err := d.ResolveTargetRequest(first, true, "EyeOfG0d", "198.51.100.9"); err != nil || ok {
 		t.Fatalf("second decision: ok=%v err=%v, want refused", ok, err)
 	}
 	if pins, err := d.ListTargetPins(scope); err != nil || len(pins) != 0 {
@@ -263,7 +263,7 @@ func TestTargetRequestNewRowAfterDecision(t *testing.T) {
 		t.Fatalf("classic ask has target key %q, %v", key, err)
 	}
 	// A classic ask is not a target request: it cannot be resolved as one.
-	if _, ok, err := d.ResolveTargetRequest(classic, true, "ARTEX", ""); err != nil || ok {
+	if _, ok, err := d.ResolveTargetRequest(classic, true, "EyeOfG0d", ""); err != nil || ok {
 		t.Fatalf("classic ask resolved as a target request: ok=%v err=%v", ok, err)
 	}
 }
@@ -294,7 +294,7 @@ FOR EACH ROW EXECUTE FUNCTION test_refuse_target_pin()`); err != nil {
 	}
 
 	id, _ := openTargetRequest(t, d, scope, host, 443, "203.0.113.99")
-	if pin, ok, err := d.ResolveTargetRequest(id, true, "ARTEX", "198.51.100.9"); err == nil || ok || pin != nil {
+	if pin, ok, err := d.ResolveTargetRequest(id, true, "EyeOfG0d", "198.51.100.9"); err == nil || ok || pin != nil {
 		t.Fatalf("approval with a failing pin insert: pin=%+v ok=%v err=%v, want an error", pin, ok, err)
 	}
 	row, err := d.GetInterceptPending(id)
@@ -310,7 +310,7 @@ FOR EACH ROW EXECUTE FUNCTION test_refuse_target_pin()`); err != nil {
 	if _, err := d.Exec(`DROP TRIGGER test_refuse_target_pin ON target_pins`); err != nil {
 		t.Fatal(err)
 	}
-	if pin, ok, err := d.ResolveTargetRequest(id, true, "ARTEX", "198.51.100.9"); err != nil || !ok || pin == nil || pin.Version != 2 {
+	if pin, ok, err := d.ResolveTargetRequest(id, true, "EyeOfG0d", "198.51.100.9"); err != nil || !ok || pin == nil || pin.Version != 2 {
 		t.Fatalf("approval after the failure was removed: pin=%+v ok=%v err=%v", pin, ok, err)
 	}
 }
@@ -322,7 +322,7 @@ func TestTargetPinVersioningExtends(t *testing.T) {
 	scope := TargetScopeRef{TaskID: targetTask(t, d, TaskCreateOptions{}).ID}
 	v1 := approveTarget(t, d, scope, "app.example.com", 443, "203.0.113.7")
 	if v1.Version != 1 || !slices.Equal(v1.PinnedIPs, []string{"203.0.113.7"}) || v1.Status != TargetPinActive ||
-		v1.DecidedBy != "ARTEX" || v1.DecidedFrom != "198.51.100.9" || v1.Resolver != "system" || v1.InterceptID == nil ||
+		v1.DecidedBy != "EyeOfG0d" || v1.DecidedFrom != "198.51.100.9" || v1.Resolver != "system" || v1.InterceptID == nil ||
 		v1.TaskID == nil || *v1.TaskID != scope.TaskID || v1.ConversationID != nil || v1.NameOnlyEffective {
 		t.Fatalf("v1 = %+v", v1)
 	}
@@ -339,7 +339,7 @@ func TestTargetPinVersioningExtends(t *testing.T) {
 	// stays the actor class.
 	detail, err := d.GetInterceptDetail(*v2.InterceptID)
 	if err != nil || detail == nil || detail.Status != "allowed" || detail.DecidedBy != "human" || detail.DecisionSource != "target" ||
-		detail.Audit == nil || detail.Audit.Approver != "ARTEX" || detail.Audit.ApproverAddr != "198.51.100.9" ||
+		detail.Audit == nil || detail.Audit.Approver != "EyeOfG0d" || detail.Audit.ApproverAddr != "198.51.100.9" ||
 		detail.Audit.EffectiveAction != "allow" || len(detail.Audit.Targets) != 1 {
 		t.Fatalf("request row = %+v, %v", detail, err)
 	}
@@ -475,7 +475,7 @@ func TestTaskDeleteKeepsPinsAndApprovalRows(t *testing.T) {
 	pins, err := d.ListTargetPins(scope)
 	if err != nil || len(pins) != 1 || pins[0].ID != pin.ID || pins[0].Status != TargetPinRevoked ||
 		pins[0].RevokedReason != TargetPinRevokedTaskDeleted || pins[0].RevokedAt == nil ||
-		!slices.Equal(pins[0].PinnedIPs, []string{"203.0.113.7"}) || pins[0].DecidedBy != "ARTEX" {
+		!slices.Equal(pins[0].PinnedIPs, []string{"203.0.113.7"}) || pins[0].DecidedBy != "EyeOfG0d" {
 		t.Fatalf("pins of the deleted task = %+v, %v; want one revoked pin, still readable", pins, err)
 	}
 	if active, err := d.ActiveTargetPins(scope, "app.example.com", 443); err != nil || len(active) != 0 {
@@ -485,7 +485,7 @@ func TestTaskDeleteKeepsPinsAndApprovalRows(t *testing.T) {
 		t.Fatalf("the pin of another task was touched: %+v, %v", active, err)
 	}
 	approved, err := d.GetInterceptDetail(*pin.InterceptID)
-	if err != nil || approved == nil || approved.Status != "allowed" || approved.Audit == nil || approved.Audit.Approver != "ARTEX" {
+	if err != nil || approved == nil || approved.Status != "allowed" || approved.Audit == nil || approved.Audit.Approver != "EyeOfG0d" {
 		t.Fatalf("approval row of the deleted task = %+v, %v; want still readable", approved, err)
 	}
 	settled, err := d.GetInterceptDetail(open)
@@ -693,7 +693,7 @@ func TestConversationDeleteRevokesPinsInSameTx(t *testing.T) {
 	pins, err := d.ListTargetPins(scope)
 	if err != nil || len(pins) != 1 || pins[0].ID != pin.ID || pins[0].Status != TargetPinRevoked ||
 		pins[0].RevokedReason != TargetPinRevokedConversationDelete || pins[0].RevokedAt == nil ||
-		!slices.Equal(pins[0].PinnedIPs, []string{"203.0.113.7"}) || pins[0].DecidedBy != "ARTEX" || pins[0].InterceptID == nil {
+		!slices.Equal(pins[0].PinnedIPs, []string{"203.0.113.7"}) || pins[0].DecidedBy != "EyeOfG0d" || pins[0].InterceptID == nil {
 		t.Fatalf("pins of the deleted conversation = %+v, %v; want one revoked pin, still readable", pins, err)
 	}
 	var rows int
@@ -901,11 +901,11 @@ func TestResolveInterceptByRecordsApprover(t *testing.T) {
 		return id
 	}
 	id := create()
-	if ok, err := d.ResolveInterceptBy(id, "allowed", "allow", "user approved execution", "human", "ARTEX", "198.51.100.9"); err != nil || !ok {
+	if ok, err := d.ResolveInterceptBy(id, "allowed", "allow", "user approved execution", "human", "EyeOfG0d", "198.51.100.9"); err != nil || !ok {
 		t.Fatalf("resolve: ok=%v err=%v", ok, err)
 	}
 	got, err := d.GetInterceptDetail(id)
-	if err != nil || got == nil || got.DecidedBy != "human" || got.Audit == nil || got.Audit.Approver != "ARTEX" ||
+	if err != nil || got == nil || got.DecidedBy != "human" || got.Audit == nil || got.Audit.Approver != "EyeOfG0d" ||
 		got.Audit.ApproverAddr != "198.51.100.9" || got.Audit.EffectiveAction != "allow" || got.Audit.ExecutionStatus != "awaiting_result" {
 		t.Fatalf("decided classic ask = %+v, %v", got, err)
 	}
@@ -936,7 +936,7 @@ func TestTargetPinRefusesEmptyAddressList(t *testing.T) {
 		if !created {
 			t.Fatalf("%s: the request was not created", name)
 		}
-		pin, ok, err := d.ResolveTargetRequest(id, true, "ARTEX", "198.51.100.9")
+		pin, ok, err := d.ResolveTargetRequest(id, true, "EyeOfG0d", "198.51.100.9")
 		if !errors.Is(err, ErrTargetPinEmpty) || ok || pin != nil {
 			t.Fatalf("%s: approval of an empty address list: pin=%+v ok=%v err=%v, want ErrTargetPinEmpty", name, pin, ok, err)
 		}
@@ -947,7 +947,7 @@ func TestTargetPinRefusesEmptyAddressList(t *testing.T) {
 		if pins, err := d.ListTargetPins(scope); err != nil || len(pins) != 0 {
 			t.Fatalf("%s: pins after the refused approval = %+v, %v; want none", name, pins, err)
 		}
-		if _, ok, err := d.ResolveTargetRequest(id, false, "ARTEX", "198.51.100.9"); err != nil || !ok {
+		if _, ok, err := d.ResolveTargetRequest(id, false, "EyeOfG0d", "198.51.100.9"); err != nil || !ok {
 			t.Fatalf("%s: denying the request: ok=%v err=%v", name, ok, err)
 		}
 	}
@@ -955,7 +955,7 @@ func TestTargetPinRefusesEmptyAddressList(t *testing.T) {
 	// The key has a pin with addresses: an empty request does not re-issue it.
 	v1 := approveTarget(t, d, scope, host, 443, "203.0.113.7")
 	id, _ := openTargetRequest(t, d, scope, host, 443)
-	if pin, ok, err := d.ResolveTargetRequest(id, true, "ARTEX", "198.51.100.9"); !errors.Is(err, ErrTargetPinEmpty) || ok || pin != nil {
+	if pin, ok, err := d.ResolveTargetRequest(id, true, "EyeOfG0d", "198.51.100.9"); !errors.Is(err, ErrTargetPinEmpty) || ok || pin != nil {
 		t.Fatalf("empty request on a pinned key: pin=%+v ok=%v err=%v, want ErrTargetPinEmpty", pin, ok, err)
 	}
 	pins, err := d.ListTargetPins(scope)
@@ -963,7 +963,7 @@ func TestTargetPinRefusesEmptyAddressList(t *testing.T) {
 		t.Fatalf("pins = %+v, %v; want v1 active and untouched", pins, err)
 	}
 	// Blank entries are dropped from a list that has addresses.
-	if _, ok, err := d.ResolveTargetRequest(id, false, "ARTEX", "198.51.100.9"); err != nil || !ok {
+	if _, ok, err := d.ResolveTargetRequest(id, false, "EyeOfG0d", "198.51.100.9"); err != nil || !ok {
 		t.Fatal(ok, err)
 	}
 	v2 := approveTarget(t, d, scope, host, 443, "", "203.0.113.8")

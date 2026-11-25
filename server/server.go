@@ -22,25 +22,25 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/egress"
-	"github.com/Autumn-27/artex/intercept"
-	"github.com/Autumn-27/artex/llmpool"
-	"github.com/Autumn-27/artex/llmrec"
-	"github.com/Autumn-27/artex/report"
-	"github.com/Autumn-27/artex/traffic"
 	"github.com/Autumn-27/norma/llm"
 	actool "github.com/Autumn-27/norma/tool"
 	"github.com/Autumn-27/norma/transcript"
+	"github.com/zakirkun/EyeOfG0d/agent"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/egress"
+	"github.com/zakirkun/EyeOfG0d/intercept"
+	"github.com/zakirkun/EyeOfG0d/llmpool"
+	"github.com/zakirkun/EyeOfG0d/llmrec"
+	"github.com/zakirkun/EyeOfG0d/report"
+	"github.com/zakirkun/EyeOfG0d/traffic"
 )
 
-// BuildVersion is the backend application version, injected from cmd/artex at
+// BuildVersion is the backend application version, injected from cmd/eyeofg0d at
 // startup (which in turn gets it from -ldflags "-X main.version=<tag>").
 // Defaults to "dev" for local builds. Exposed to the frontend via GET /api/health.
 var BuildVersion = "dev"
 
-// Server exposes the ARTEX backend over a JSON HTTP API for the shadcn/ui
+// Server exposes the EyeOfG0d backend over a JSON HTTP API for the shadcn/ui
 // frontend.
 type Server struct {
 	m      *Manager
@@ -50,7 +50,7 @@ type Server struct {
 	skillDir string // root directory for skill subdirectories
 	jwtKey   []byte // HS256 signing key loaded from / generated into keyDir/jwt.key
 
-	scrubSecrets bool // drop ARTEX_PG_DSN and the API keys from the environment once read (binary only)
+	scrubSecrets bool // drop EYEOFG0D_PG_DSN and the API keys from the environment once read (binary only)
 
 	setupMu    sync.Mutex
 	setupToken string // one-time token POST /api/auth/init requires; empty when none is active
@@ -67,7 +67,7 @@ type Server struct {
 
 	loginLimit     *loginLimiter  // per-IP attempt limit on POST /api/auth/login
 	pwdLimit       *loginLimiter  // attempt limit on POST /api/auth/change-password (IP + session token)
-	trustedProxies []netip.Prefix // ARTEX_TRUSTED_PROXIES; see clientIP
+	trustedProxies []netip.Prefix // EYEOFG0D_TRUSTED_PROXIES; see clientIP
 
 	// concMu serializes concurrency-cap decisions (admission + reconcile) so a
 	// scheduler tick and an HTTP settings change / task creation can't both count
@@ -1073,8 +1073,8 @@ func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 200, map[string]any{"ok": true})
 		return
 	}
-	out := map[string]any{"ok": true, "service": "artex", "version": BuildVersion}
-	// Opt-in only (ARTEX_UPDATE_CHECK); off, this returns "" without any request.
+	out := map[string]any{"ok": true, "service": "eyeofg0d", "version": BuildVersion}
+	// Opt-in only (EYEOFG0D_UPDATE_CHECK); off, this returns "" without any request.
 	if latest := updates.newerVersion(r.Context(), time.Now(), BuildVersion); latest != "" {
 		out["latest_version"] = latest
 	}
@@ -2426,7 +2426,7 @@ func (s *Server) findingsExport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stage, err := os.MkdirTemp("", "artex-finding-export-")
+	stage, err := os.MkdirTemp("", "eyeofg0d-finding-export-")
 	if err != nil {
 		writeErr(w, 500, err.Error())
 		return
@@ -3846,7 +3846,7 @@ func (s *Server) settingsPayload() map[string]any {
 		// Render limits of IM messages; 0 = no truncation.
 		"notify_summary_max_runes": limits.SummaryRunes,
 		"notify_assets_max_shown":  limits.AssetsShown,
-		// Effective target noise profile (off by default): the stored setting, else ARTEX_NOISE_PROFILE.
+		// Effective target noise profile (off by default): the stored setting, else EYEOFG0D_NOISE_PROFILE.
 		"noise_profile": egress.CurrentProfile().Name,
 	}
 }

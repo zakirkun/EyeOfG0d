@@ -263,7 +263,7 @@ func (c *Client) initialize(ctx context.Context) error {
 		result, err := c.call(ctx, "initialize", map[string]any{
 			"protocolVersion": version,
 			"capabilities":    map[string]any{},
-			"clientInfo":      map[string]any{"name": "artex", "version": "0.2"},
+			"clientInfo":      map[string]any{"name": "eyeofg0d", "version": "0.2"},
 		})
 		if err != nil {
 			if i+1 < len(versions) && isUnsupportedVersion(err) {

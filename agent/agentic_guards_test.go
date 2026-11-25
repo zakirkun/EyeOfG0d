@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
 	actool "github.com/Autumn-27/norma/tool"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 // guardTaskStore creates a throwaway task (PG) and returns its exploration store.

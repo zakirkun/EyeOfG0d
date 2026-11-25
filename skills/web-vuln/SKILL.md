@@ -1,6 +1,7 @@
 ---
 name: web-vuln
 description: "Per-class web vulnerability testing: access control (IDOR, BOLA, BFLA), auth (JWT, OAuth, SAML, 2FA, reset), injection (SQL, NoSQL, SSTI, XSS, XXE, deserialization), request handling (smuggling, CORS, CSRF, cache), and business logic. Index of 55 playbooks under references/."
+mcps: ScopeSentry, browser
 ---
 
 # Web vulnerability playbook (index)
@@ -42,7 +43,7 @@ Present: `httpx`, `nuclei`, `ffuf`, `dalfox` (DOM/reflected XSS), `sqlmap`,
 apps), `curl`, `jq`, `ripgrep`.
 
 Absent: Caido, Burp, `wpscan`, `semgrep`, `mitmproxy`. For intercepted-traffic
-work, ARTEX's own recording proxy is the equivalent path, and `traffic_search`
+work, EyeOfG0d's own recording proxy is the equivalent path, and `traffic_search`
 / `traffic_get` are how you read it back.
 
 ## Finding the right playbook

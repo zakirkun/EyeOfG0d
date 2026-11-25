@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/guard"
-	"github.com/Autumn-27/artex/intercept"
 	"github.com/Autumn-27/norma/llm"
+	"github.com/zakirkun/EyeOfG0d/agent"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/guard"
+	"github.com/zakirkun/EyeOfG0d/intercept"
 )
 
 // Target-gate wiring: every platform-owned session starts on a context that
@@ -398,7 +398,7 @@ func TestTargetGateSeamAllowsWithoutDBWrite(t *testing.T) {
 	if err := ic.SetEnabledTools([]string{"Bash"}); err != nil {
 		t.Fatal(err)
 	}
-	const sentinel = "ARTEX_TARGET_SEAM_PROBE"
+	const sentinel = "EYEOFG0D_TARGET_SEAM_PROBE"
 	rule, err := f.m.pg.CreateInterceptRule("target seam probe", "tool_input", "string", sentinel, "deny", "", 1000000, true, false, 0, "deny")
 	if err != nil {
 		t.Fatal(err)

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# ARTEX update script: (1) Docker update (rebuild the image from this checkout)  (2) local build update (rebuild the binary)
+# EyeOfG0d update script: (1) Docker update (rebuild the image from this checkout)  (2) local build update (rebuild the binary)
 # Counterpart of install.sh: install handles the first-time setup, update upgrades to a new version.
-# No manual DB migration needed — artex idempotently re-runs schema.sql on every start (with ADD COLUMN/CREATE
+# No manual DB migration needed — eyeofg0d idempotently re-runs schema.sql on every start (with ADD COLUMN/CREATE
 # INDEX IF NOT EXISTS), so "restart equals migrate". Data (pgdata volume, ./data, ./skills) is not affected.
 set -euo pipefail
 cd "$(cd "$(dirname "$0")" && pwd)"
@@ -36,15 +36,15 @@ update_docker(){
     || die "docker / docker compose not detected; install and deploy with ./install.sh first"
   [ -f .env ] || die ".env not found; run ./install.sh first to complete the initial deployment"
 
-  # Touch only artex: postgres is pinned to 16-alpine and does not need upgrading along
-  # (pulling it wastes bandwidth, and a major version bump risks compatibility). artex
+  # Touch only eyeofg0d: postgres is pinned to 16-alpine and does not need upgrading along
+  # (pulling it wastes bandwidth, and a major version bump risks compatibility). eyeofg0d
   # declares depends_on postgres, so an up with the service name starts pg if needed and leaves a running one untouched.
-  info "Building the image from this checkout (artex only)…"
-  docker compose build artex
-  info "Recreating artex (schema migrates automatically on restart)…"
-  docker compose up -d artex
+  info "Building the image from this checkout (eyeofg0d only)…"
+  docker compose build eyeofg0d
+  info "Recreating eyeofg0d (schema migrates automatically on restart)…"
+  docker compose up -d eyeofg0d
   ok "Update complete → http://localhost:8787"
-  info "View logs: docker compose logs -f artex"
+  info "View logs: docker compose logs -f eyeofg0d"
   info "Clean up old images (optional): docker image prune -f"
 }
 
@@ -59,17 +59,17 @@ update_local(){
     ( cd web && npm ci && npm run build:static )
     rm -rf server/webui/dist && cp -r web/out server/webui/dist
     info "Recompiling the embedded single binary…"
-    CGO_ENABLED=0 go build -tags embedui -trimpath -o artex ./cmd/artex
+    CGO_ENABLED=0 go build -tags embedui -trimpath -o eyeofg0d ./cmd/eyeofg0d
   else
     warn "npm not detected: building a backend **without the embedded frontend** (run the frontend separately with npm run dev)"
-    CGO_ENABLED=0 go build -o artex ./cmd/artex
+    CGO_ENABLED=0 go build -o eyeofg0d ./cmd/eyeofg0d
   fi
-  ok "Build complete → ./artex"
-  warn "Restart the running artex process to take effect (schema migrates automatically on restart)"
+  ok "Build complete → ./eyeofg0d"
+  warn "Restart the running eyeofg0d process to take effect (schema migrates automatically on restart)"
 }
 
 echo "=============================="
-echo "  ARTEX Update"
+echo "  EyeOfG0d Update"
 echo "  1) Docker update (pull new image and rebuild)"
 echo "  2) Local update (rebuild with go)"
 echo "=============================="

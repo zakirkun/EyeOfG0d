@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/egress"
 	mproxy "github.com/lqqyt2423/go-mitmproxy/proxy"
+	"github.com/zakirkun/EyeOfG0d/egress"
 )
 
 // startProxy runs a real recording proxy on a free loopback port and returns it
@@ -250,7 +250,7 @@ func TestSinkStripsAndMarks(t *testing.T) {
 	}
 	conn := &mproxy.ClientConn{}
 	conn.Id[0] = 1
-	f = flow(http.MethodConnect, "Basic YXJ0ZXgtcGFjZTphcnRleC1wYWNl", conn) // artex-pace:artex-pace
+	f = flow(http.MethodConnect, "Basic ZXllb2ZnMGQtcGFjZTpleWVvZmcwZC1wYWNl", conn) // eyeofg0d-pace:eyeofg0d-pace
 	s.Requestheaders(f)
 	if f.Request.Header.Get("Proxy-Authorization") != "" || markedCount(s) != 1 {
 		t.Fatalf("marker on CONNECT: header %q, marks %d", f.Request.Header.Get("Proxy-Authorization"), markedCount(s))

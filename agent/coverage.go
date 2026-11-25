@@ -3,7 +3,7 @@ package agent
 import (
 	"log"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 // coverageOn reports whether asset-coverage tools stay available for this task.

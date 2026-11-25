@@ -1,4 +1,4 @@
-module github.com/Autumn-27/artex
+module github.com/zakirkun/EyeOfG0d
 
 go 1.26.10
 

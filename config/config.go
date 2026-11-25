@@ -54,10 +54,10 @@ func BaseDir() string {
 	return dir
 }
 
-// KeyDir holds jwt.key and secret.key: ARTEX_JWT_KEY_DIR (the Docker image points
+// KeyDir holds jwt.key and secret.key: EYEOFG0D_JWT_KEY_DIR (the Docker image points
 // it at the /app/keys volume) or the base dir. Never the browsable data dir.
 func KeyDir() string {
-	dir := strings.TrimSpace(os.Getenv("ARTEX_JWT_KEY_DIR"))
+	dir := strings.TrimSpace(os.Getenv("EYEOFG0D_JWT_KEY_DIR"))
 	if dir == "" {
 		dir = BaseDir()
 	}
@@ -87,7 +87,7 @@ func isGoRunDir(dir string) bool {
 }
 
 // Path returns the config file path. Resolution order:
-//  1. env ARTEX_CONFIG (explicit override)
+//  1. env EYEOFG0D_CONFIG (explicit override)
 //  2. ./config.json in the current working directory (running from the project
 //     dir — robust no matter where `go run` placed the temp/cached binary)
 //  3. config.json next to the executable (a distributed binary keeps it beside)
@@ -95,7 +95,7 @@ func isGoRunDir(dir string) bool {
 // The first existing file wins. If none exist, the CWD path is returned so the
 // "not found" message points at the project dir the user most likely expected.
 func Path() string {
-	if v := strings.TrimSpace(os.Getenv("ARTEX_CONFIG")); v != "" {
+	if v := strings.TrimSpace(os.Getenv("EYEOFG0D_CONFIG")); v != "" {
 		return v
 	}
 	var candidates []string
@@ -132,12 +132,12 @@ func Load() (Config, error) {
 
 // SkillDir returns the skill root directory with precedence:
 //
-//	env ARTEX_SKILL_DIR  >  config file (skill_dir)  >  BaseDir()/skills
+//	env EYEOFG0D_SKILL_DIR  >  config file (skill_dir)  >  BaseDir()/skills
 //
 // The directory is created if it does not exist.
 func SkillDir() (string, error) {
 	var d string
-	if v := strings.TrimSpace(os.Getenv("ARTEX_SKILL_DIR")); v != "" {
+	if v := strings.TrimSpace(os.Getenv("EYEOFG0D_SKILL_DIR")); v != "" {
 		d = v
 	} else {
 		c, err := Load()
@@ -156,15 +156,15 @@ func SkillDir() (string, error) {
 
 // PostgresDSN resolves the connection string with precedence:
 //
-//	env ARTEX_PG_DSN  >  config file (database.dsn, or assembled from fields)
+//	env EYEOFG0D_PG_DSN  >  config file (database.dsn, or assembled from fields)
 //
 // There is NO built-in fallback: when neither source supplies a database config,
 // it returns an error naming the config path it inspected, so startup fails loudly
 // instead of silently connecting to a wrong default. source describes where the
 // DSN came from (for startup logging).
 func PostgresDSN() (dsn, source string, err error) {
-	if v := strings.TrimSpace(os.Getenv("ARTEX_PG_DSN")); v != "" {
-		return v, "environment variable ARTEX_PG_DSN", nil
+	if v := strings.TrimSpace(os.Getenv("EYEOFG0D_PG_DSN")); v != "" {
+		return v, "environment variable EYEOFG0D_PG_DSN", nil
 	}
 	c, err := Load()
 	if err != nil {
@@ -177,7 +177,7 @@ func PostgresDSN() (dsn, source string, err error) {
 	if db.Host != "" || db.DBName != "" || db.User != "" {
 		return db.buildDSN(), "config file " + Path() + " (database fields)", nil
 	}
-	return "", "", fmt.Errorf("no database config found: the environment variable ARTEX_PG_DSN is not set, and config file %s provides no database (dsn or host/user/dbname). Create the config file or set the environment variable and retry", Path())
+	return "", "", fmt.Errorf("no database config found: the environment variable EYEOFG0D_PG_DSN is not set, and config file %s provides no database (dsn or host/user/dbname). Create the config file or set the environment variable and retry", Path())
 }
 
 func (d Database) buildDSN() string {

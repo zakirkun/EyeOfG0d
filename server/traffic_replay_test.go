@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/traffic"
+	"github.com/zakirkun/EyeOfG0d/traffic"
 )
 
 // replayServer wires a Server like ingestServer. With traffic off,

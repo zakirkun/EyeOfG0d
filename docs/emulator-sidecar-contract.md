@@ -8,16 +8,16 @@ Enabling it is two steps, and both are required:
 
 ```sh
 docker compose --profile emulator build emulator
-ARTEX_EMULATOR_ENABLED=1 docker compose --profile emulator up -d
+EYEOFG0D_EMULATOR_ENABLED=1 docker compose --profile emulator up -d
 ```
 
-`ARTEX_EMULATOR_ENABLED` defaults to `0`, so starting the profile without it
+`EYEOFG0D_EMULATOR_ENABLED` defaults to `0`, so starting the profile without it
 leaves the backend reporting the capability as disabled while a real emulator
 runs and is never used. Conversely, setting the flag without starting the profile
 points the backend at a sidecar that is not running; that surfaces as
 "sidecar is unreachable", never as a fabricated success.
 
-ARTEX calls only the fixed service URL `http://emulator:8090` and the fixed
+EyeOfG0d calls only the fixed service URL `http://emulator:8090` and the fixed
 endpoints:
 
 - `GET  /v1/tasks/{numeric-task-id}` — current lifecycle snapshot
@@ -107,7 +107,7 @@ Linux the practical failure is the container-creation error described above.
   non-stopped state is downgraded to `failed`. A persisted `ready` is never
   trusted across a restart.
 - The service has only `/dev/kvm`. No published ports, no Docker socket, no
-  ARTEX keys, no workspace mount, no `privileged: true`, and no added
+  EyeOfG0d keys, no workspace mount, no `privileged: true`, and no added
   capabilities. ADB (5555) and the emulator console (5554) stay inside the
   container network.
 - The sidecar accepts only a validated numeric task id plus start/stop. It

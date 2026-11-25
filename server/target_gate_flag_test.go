@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/intercept"
 	"github.com/Autumn-27/norma/llm"
+	"github.com/zakirkun/EyeOfG0d/agent"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/intercept"
 )
 
 // Target-gate opt-in flag, pins and decisions over the real mux and the real
@@ -239,7 +239,7 @@ func TestSpawnedTaskInheritsGateFromCaller(t *testing.T) {
 		t.Fatal("control: one parent gated, the other not")
 	}
 	// The gated parent holds one pin, which no child may get.
-	if p, ok, err := g.m.pg.ResolveTargetRequest(openTargetRow(t, g.m.pg, taskRef(t, gated), "app.example.com", "203.0.113.7"), true, "ARTEX", "192.0.2.1"); err != nil || !ok || p == nil {
+	if p, ok, err := g.m.pg.ResolveTargetRequest(openTargetRow(t, g.m.pg, taskRef(t, gated), "app.example.com", "203.0.113.7"), true, "EyeOfG0d", "192.0.2.1"); err != nil || !ok || p == nil {
 		t.Fatalf("pin the parent: %+v ok=%v err=%v", p, ok, err)
 	}
 	conv, err := g.m.pg.CreateConversationGated("auto", "spawn from a gated chat", nil, true)
@@ -377,7 +377,7 @@ func TestTriggeredConversationInheritsGate(t *testing.T) {
 	g.s.cfgMu.Unlock()
 	on := true
 	gated, open := g.newTask(t, db.TaskCreateOptions{TargetGate: &on}), g.newTask(t, db.TaskCreateOptions{})
-	if p, ok, err := g.m.pg.ResolveTargetRequest(openTargetRow(t, g.m.pg, taskRef(t, gated), "app.example.com", "203.0.113.7"), true, "ARTEX", "192.0.2.1"); err != nil || !ok || p == nil {
+	if p, ok, err := g.m.pg.ResolveTargetRequest(openTargetRow(t, g.m.pg, taskRef(t, gated), "app.example.com", "203.0.113.7"), true, "EyeOfG0d", "192.0.2.1"); err != nil || !ok || p == nil {
 		t.Fatalf("pin the gated task: %+v ok=%v err=%v", p, ok, err)
 	}
 	gatedID, openID := taskRef(t, gated).TaskID, taskRef(t, open).TaskID
@@ -518,12 +518,12 @@ func TestInterceptDecideRecordsApproverOverHTTP(t *testing.T) {
 		t.Fatalf("decide target row: %d", code)
 	}
 	pins, err := pg.ListTargetPins(scope)
-	if err != nil || len(pins) != 1 || pins[0].DecidedBy != "ARTEX" || pins[0].DecidedFrom != "192.0.2.1" ||
+	if err != nil || len(pins) != 1 || pins[0].DecidedBy != "EyeOfG0d" || pins[0].DecidedFrom != "192.0.2.1" ||
 		!slices.Equal(pins[0].PinnedIPs, []string{"203.0.113.7"}) || pins[0].InterceptID == nil || *pins[0].InterceptID != target {
 		t.Fatalf("pins = %+v, %v; want one pin with the approver and the address", pins, err)
 	}
 	row, err := pg.GetInterceptDetail(target)
-	if err != nil || row == nil || row.Status != "allowed" || row.DecidedBy != "human" || row.Audit.Approver != "ARTEX" || row.Audit.ApproverAddr != "192.0.2.1" {
+	if err != nil || row == nil || row.Status != "allowed" || row.DecidedBy != "human" || row.Audit.Approver != "EyeOfG0d" || row.Audit.ApproverAddr != "192.0.2.1" {
 		t.Fatalf("target row = %+v, %v", row, err)
 	}
 	if code := decide(target, "denied"); code != 409 {
@@ -548,7 +548,7 @@ func TestInterceptDecideRecordsApproverOverHTTP(t *testing.T) {
 	}
 	row, err = pg.GetInterceptDetail(classic)
 	if err != nil || row == nil || row.Status != "allowed" || row.DecidedBy != "human" || row.Audit == nil ||
-		row.Audit.Approver != "ARTEX" || row.Audit.ApproverAddr != "192.0.2.1" || row.Audit.EffectiveAction != "allow" {
+		row.Audit.Approver != "EyeOfG0d" || row.Audit.ApproverAddr != "192.0.2.1" || row.Audit.EffectiveAction != "allow" {
 		t.Fatalf("classic row = %+v, %v; want the approver and the address in its audit", row, err)
 	}
 	if pins, err := pg.ListTargetPins(scope); err != nil || len(pins) != 1 {
@@ -571,8 +571,8 @@ func TestJWTSubject(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := jwtSubject(token, key); got != "ARTEX" {
-		t.Fatalf("subject = %q, want ARTEX", got)
+	if got := jwtSubject(token, key); got != "EyeOfG0d" {
+		t.Fatalf("subject = %q, want EyeOfG0d", got)
 	}
 	if got := jwtSubject(token, []byte("another key, another key, another")); got != "" {
 		t.Fatalf("subject of a token signed with another key = %q, want none", got)
@@ -597,7 +597,7 @@ func TestTargetPinRoutes(t *testing.T) {
 	})
 	pin := func(scope db.TargetScopeRef, host string) int64 {
 		t.Helper()
-		p, ok, err := pg.ResolveTargetRequest(openTargetRow(t, pg, scope, host, "203.0.113.7"), true, "ARTEX", "192.0.2.1")
+		p, ok, err := pg.ResolveTargetRequest(openTargetRow(t, pg, scope, host, "203.0.113.7"), true, "EyeOfG0d", "192.0.2.1")
 		if err != nil || !ok || p == nil {
 			t.Fatalf("pin %s: %+v ok=%v err=%v", host, p, ok, err)
 		}
@@ -629,7 +629,7 @@ func TestTargetPinRoutes(t *testing.T) {
 			t.Fatalf("%s: %d pins, want 1", tc.base, len(pins))
 		}
 		got := pins[0].(map[string]any)
-		if got["id"] != float64(tc.id) || got["host"] != tc.host || got["status"] != "active" || got["decided_by"] != "ARTEX" || got["name_only_effective"] != false {
+		if got["id"] != float64(tc.id) || got["host"] != tc.host || got["status"] != "active" || got["decided_by"] != "EyeOfG0d" || got["name_only_effective"] != false {
 			t.Fatalf("%s: listed pin = %v", tc.base, got)
 		}
 		revoke := fmt.Sprintf("%s/target-pins/%d/revoke", tc.base, tc.id)
@@ -761,7 +761,7 @@ func TestClaimLostEndsGateWait(t *testing.T) {
 	if ids := openRows(); !slices.Equal(ids, []int64{request}) {
 		t.Fatalf("open requests = %v, want the second claimer on the same request %d", ids, request)
 	}
-	if err := ic.Decide(request, true, "ARTEX", "192.0.2.1"); err != nil {
+	if err := ic.Decide(request, true, "EyeOfG0d", "192.0.2.1"); err != nil {
 		t.Fatal(err)
 	}
 	select {

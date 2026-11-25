@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/intercept"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/intercept"
 )
 
-// PG test: needs a PostgreSQL database (ARTEX_PG_DSN); skipped without one.
+// PG test: needs a PostgreSQL database (EYEOFG0D_PG_DSN); skipped without one.
 // POST /api/intercept/pending/{id}/always-allow derives the rule from the
 // stored row, never from the body, and leaves the request pending.
 func TestInterceptAlwaysAllowPG(t *testing.T) {

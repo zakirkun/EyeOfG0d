@@ -6,9 +6,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/llmrec"
 	"github.com/Autumn-27/norma/llm"
+	"github.com/zakirkun/EyeOfG0d/agent"
+	"github.com/zakirkun/EyeOfG0d/llmrec"
 )
 
 // stopReasonProvider ends a streamed call with the given stop reason and no

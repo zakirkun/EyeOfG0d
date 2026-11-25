@@ -21,8 +21,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/db"
+	"github.com/zakirkun/EyeOfG0d/agent"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 const emulatorSidecarURL = "http://emulator:8090"
@@ -230,7 +230,7 @@ func newSidecarClient(baseURL string) HTTPEmulatorClient {
 }
 
 func newEmulator(ctx context.Context, root string, emit func(*Task, db.Activity)) *Emulator {
-	e := &Emulator{root: filepath.Join(root, "emulator"), enabled: os.Getenv("ARTEX_EMULATOR_ENABLED") == "1", client: newSidecarClient(emulatorSidecarURL), states: map[string]EmulatorStateSnapshot{}, emit: emit}
+	e := &Emulator{root: filepath.Join(root, "emulator"), enabled: os.Getenv("EYEOFG0D_EMULATOR_ENABLED") == "1", client: newSidecarClient(emulatorSidecarURL), states: map[string]EmulatorStateSnapshot{}, emit: emit}
 	e.capable = e.capability
 	_ = os.MkdirAll(e.root, 0o700)
 	go func() { <-ctx.Done(); e.stopAll() }()

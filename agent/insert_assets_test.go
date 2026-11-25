@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 // testDB opens a DB connection, skipping if PG is unavailable.

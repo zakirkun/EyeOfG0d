@@ -16,7 +16,7 @@ Verified against the tree at `65045ef`, not taken from summaries:
 | Export format switch, 4 cases + default 400 | `server/server.go:2434-2471` |
 | Evidence staging already exists and is reused by every format | `server/server.go:2423` → `evidence.Store.StageFindingsExport` |
 | `findings` table: id, task_id, node_id, vulnclass, name, severity, summary, evidence, worker, asset_ids, status, report, created_at | `db/schema.sql` (`CREATE TABLE IF NOT EXISTS findings`) |
-| Auth: literal `req.Username != "ARTEX"`, boolean `requireAuth` | `server/auth.go:585`, `server/auth.go:287` |
+| Auth: literal `req.Username != "EyeOfG0d"`, boolean `requireAuth` | `server/auth.go:585`, `server/auth.go:287` |
 | `jwtSubject` already parses and returns a subject | `server/auth.go:249` |
 
 ---
@@ -111,13 +111,13 @@ refuses to claim `resolved`.
 
 4. Entry points:
    - `GET /api/tasks/{id}/export?format=bundle` — one case in the switch (`server/server.go:2434`)
-   - CLI subcommand in `cmd/artex/main.go` (`-verify <file>`, `-diff <a> <b>`) so it works air-gapped with
+   - CLI subcommand in `cmd/eyeofg0d/main.go` (`-verify <file>`, `-diff <a> <b>`) so it works air-gapped with
      no server running
 
 5. **Import** — `POST /api/bundles/import` creates a read-only task view. This is what makes the demo
    work without an LLM key.
 
-**Exit criteria:** export → delete server DB → `artex -verify` passes offline; tamper one blob byte →
+**Exit criteria:** export → delete server DB → `eyeofg0d -verify` passes offline; tamper one blob byte →
 verify fails with the right message.
 
 ---
@@ -163,8 +163,8 @@ subsystem, not a one-file change.
 
 ## Phase 6 — Demo + docs (0.5 week)
 
-- Record one real engagement; commit `examples/demo-artex-bundle.tar.gz`.
-- README quick start gains a 60-second path: `artex -import examples/demo…` → populated UI, no key.
+- Record one real engagement; commit `examples/demo-eyeofg0d-bundle.tar.gz`.
+- README quick start gains a 60-second path: `eyeofg0d -import examples/demo…` → populated UI, no key.
 - `docs/bundle-format.md` — versioned schema, upgrade path, and a "write your own verifier" section.
 
 ---

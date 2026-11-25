@@ -17,7 +17,7 @@ import (
 // the proxy, or drops the marker, is not paced.
 
 // PaceUser is the user and password of the marker userinfo.
-const PaceUser = "artex-pace"
+const PaceUser = "eyeofg0d-pace"
 
 // MarkProxyURL returns raw with the marker userinfo. raw is returned unchanged
 // when it does not parse or already carries a userinfo.

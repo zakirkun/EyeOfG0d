@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/intercept"
+	"github.com/zakirkun/EyeOfG0d/intercept"
 )
 
 // open is a profile that does not limit, for the tests of one lever.
@@ -258,12 +258,12 @@ func TestUserAgentAndEnv(t *testing.T) {
 	if p := ProfileFromEnv(); p.RPS != 0 || p.Name != "off" {
 		t.Fatalf("default profile: %+v, want off", p)
 	}
-	t.Setenv("ARTEX_NOISE_PROFILE", "Balanced")
-	t.Setenv("ARTEX_TARGET_USER_AGENT", "x/1")
+	t.Setenv("EYEOFG0D_NOISE_PROFILE", "Balanced")
+	t.Setenv("EYEOFG0D_TARGET_USER_AGENT", "x/1")
 	if p := ProfileFromEnv(); p.Name != "balanced" || p.RPS != 5 || p.UserAgent != "x/1" {
 		t.Fatalf("balanced from env: %+v", p)
 	}
-	t.Setenv("ARTEX_NOISE_PROFILE", "loud")
+	t.Setenv("EYEOFG0D_NOISE_PROFILE", "loud")
 	if p := ProfileFromEnv(); p.RPS != 0 {
 		t.Fatalf("unknown profile: %+v, want off", p)
 	}

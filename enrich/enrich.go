@@ -20,10 +20,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/egress"
-	"github.com/Autumn-27/artex/intercept"
-	"github.com/Autumn-27/artex/knowledge"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/egress"
+	"github.com/zakirkun/EyeOfG0d/intercept"
+	"github.com/zakirkun/EyeOfG0d/knowledge"
 
 	"github.com/miekg/dns"
 	"github.com/projectdiscovery/dnsx/libs/dnsx"

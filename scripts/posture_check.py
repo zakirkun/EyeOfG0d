@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refusal-posture probe for an ARTEX LLM profile (or any OpenAI-compatible endpoint).
+"""Refusal-posture probe for an EyeOfG0d LLM profile (or any OpenAI-compatible endpoint).
 
 Run this before binding a profile to the pentest/worker agents. Over-refusal is
 the failure that costs missions: an agent that refuses to run an authorized

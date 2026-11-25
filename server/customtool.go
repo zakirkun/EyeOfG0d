@@ -17,13 +17,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/egress"
-	"github.com/Autumn-27/artex/guard"
-	"github.com/Autumn-27/artex/intercept"
-	"github.com/Autumn-27/artex/notify"
 	"github.com/Autumn-27/norma/permission"
 	actool "github.com/Autumn-27/norma/tool"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/egress"
+	"github.com/zakirkun/EyeOfG0d/guard"
+	"github.com/zakirkun/EyeOfG0d/intercept"
+	"github.com/zakirkun/EyeOfG0d/notify"
 )
 
 // This file implements the custom tool executor (docs/custom-tool-design.md). tools rows

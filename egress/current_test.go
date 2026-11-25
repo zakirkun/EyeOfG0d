@@ -76,7 +76,7 @@ func (r *recordRT) RoundTrip(req *http.Request) (*http.Response, error) {
 // Off stays a strict passthrough, through Transport and Dynamic alike.
 func TestOffIsPassthroughAfterSetProfile(t *testing.T) {
 	keepProfile(t)
-	t.Setenv("ARTEX_TARGET_USER_AGENT", "artex-test/1")
+	t.Setenv("EYEOFG0D_TARGET_USER_AGENT", "eyeofg0d-test/1")
 	off, ok := ProfileByName("OFF")
 	if !ok || off.Name != "off" || off.UserAgent != "" {
 		t.Fatalf("ProfileByName(OFF) = %+v %v", off, ok)
@@ -94,7 +94,7 @@ func TestOffIsPassthroughAfterSetProfile(t *testing.T) {
 		t.Fatalf("off counted a request: %v", Current().Snapshot())
 	}
 	// Any other profile carries the user agent.
-	if p, _ := ProfileByName("balanced"); p.UserAgent != "artex-test/1" {
+	if p, _ := ProfileByName("balanced"); p.UserAgent != "eyeofg0d-test/1" {
 		t.Fatalf("balanced UserAgent = %q", p.UserAgent)
 	}
 	if _, ok := ProfileByName(""); ok {

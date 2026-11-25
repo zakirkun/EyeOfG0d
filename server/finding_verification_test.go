@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
 	actool "github.com/Autumn-27/norma/tool"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 const verificationBody = "HTTP/1.1 200 OK\nuser   admin:\tx7\nend of dump"

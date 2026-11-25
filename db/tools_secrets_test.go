@@ -108,7 +108,7 @@ func TestToolExecSealedAtRest(t *testing.T) {
 	if raw := rawToolExec(t, d, "t_secexec_shell"); raw != "{}" {
 		t.Fatalf("empty exec stored as %s, want {}", raw)
 	}
-	if err := d.CreateCustomTool(&Tool{Key: "t_secexec_resv", Kind: "command", Exec: json.RawMessage(`{"__artex_enc":"x"}`)}); err == nil {
+	if err := d.CreateCustomTool(&Tool{Key: "t_secexec_resv", Kind: "command", Exec: json.RawMessage(`{"__eyeofg0d_enc":"x"}`)}); err == nil {
 		t.Fatal("reserved key must be refused on write")
 	}
 

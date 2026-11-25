@@ -625,7 +625,7 @@ export default function SystemSettingsPage() {
                 </div>
                 <p className="text-muted-foreground text-xs leading-relaxed">
                   Queries leave this instance and go to api.keenable.ai. The request carries{" "}
-                  <b>X-Keenable-Title: ARTEX</b> so the provider can identify the caller. With no key, the
+                  <b>X-Keenable-Title: EyeOfG0d</b> so the provider can identify the caller. With no key, the
                   public endpoint is rate-limited per IP; a key raises the limit, but the backend works
                   without one.
                 </p>

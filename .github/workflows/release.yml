@@ -53,22 +53,22 @@ jobs:
           path: server/webui/dist
       - name: Build and package with build.sh
         env:
-          ARTEX_TARGET_OS: ${{ matrix.goos }}
-          ARTEX_TARGET_ARCH: ${{ matrix.goarch }}
-          ARTEX_BUILD_VERSION: ${{ github.ref_name }}
-          ARTEX_SKIP_FRONTEND: "1"
-          ARTEX_SKIP_NPM_CI: "1"
+          EYEOFG0D_TARGET_OS: ${{ matrix.goos }}
+          EYEOFG0D_TARGET_ARCH: ${{ matrix.goarch }}
+          EYEOFG0D_BUILD_VERSION: ${{ github.ref_name }}
+          EYEOFG0D_SKIP_FRONTEND: "1"
+          EYEOFG0D_SKIP_NPM_CI: "1"
           # UPX self-extracting ELF binaries crash on some Linux kernels, virtualization
           # setups, and security policies. Releases use Go linker trimming and zip
           # compression, prioritizing portability.
-          ARTEX_COMPRESS: "0"
-          ARTEX_PACKAGE: "1"
-          ARTEX_PACKAGE_DIR: dist
+          EYEOFG0D_COMPRESS: "0"
+          EYEOFG0D_PACKAGE: "1"
+          EYEOFG0D_PACKAGE_DIR: dist
         run: |
-          ./build.sh --target "${ARTEX_TARGET_OS}/${ARTEX_TARGET_ARCH}"
+          ./build.sh --target "${EYEOFG0D_TARGET_OS}/${EYEOFG0D_TARGET_ARCH}"
       - name: Smoke test Linux amd64 binary
         if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
-        run: dist/artex-linux-amd64/artex -h
+        run: dist/eyeofg0d-linux-amd64/eyeofg0d -h
       - uses: actions/upload-artifact@v4
         with:
           name: pkg-${{ matrix.goos }}-${{ matrix.goarch }}
@@ -78,7 +78,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bin-linux-${{ matrix.goarch }}
-          path: dist/artex-linux-${{ matrix.goarch }}/artex
+          path: dist/eyeofg0d-linux-${{ matrix.goarch }}/eyeofg0d
 
   # ③ Collect all zips → create the GitHub Release
   release:
@@ -117,8 +117,8 @@ jobs:
           mkdir -p "$SRC/web"
           cp go.mod go.sum "$SRC/"
           cp web/package-lock.json "$SRC/web/"
-          sbom="dist/artex-${TAG}.cdx.json"
-          "$SYFT" scan "dir:$SRC" --source-name artex --source-version "$TAG" -o "cyclonedx-json=$sbom"
+          sbom="dist/eyeofg0d-${TAG}.cdx.json"
+          "$SYFT" scan "dir:$SRC" --source-name eyeofg0d --source-version "$TAG" -o "cyclonedx-json=$sbom"
           grep -q '"pkg:golang/' "$sbom" || { echo "::error::SBOM has no pkg:golang entries"; exit 1; }
           grep -q '"pkg:npm/' "$sbom" || { echo "::error::SBOM has no pkg:npm entries"; exit 1; }
           echo "SBOM_PATH=$sbom" >> "$GITHUB_ENV"

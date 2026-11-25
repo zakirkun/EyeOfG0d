@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/Autumn-27/artex/llmrec"
+	"github.com/zakirkun/EyeOfG0d/llmrec"
 )
 
 // IsRefusalStop reports whether a provider stop reason means the provider's

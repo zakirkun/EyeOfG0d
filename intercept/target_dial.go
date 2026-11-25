@@ -172,7 +172,7 @@ type dialError struct {
 }
 
 func (e *dialError) Error() string {
-	msg := "[ARTEX platform control, not target defense] " + e.code + ": the connection to " + e.target + " was not opened: " + e.reason + "."
+	msg := "[EyeOfG0d platform control, not target defense] " + e.code + ": the connection to " + e.target + " was not opened: " + e.reason + "."
 	if e.code == TargetApprovalPending {
 		msg += " An approval was requested. Retry the same call after the approval."
 	}

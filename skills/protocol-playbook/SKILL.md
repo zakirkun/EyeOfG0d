@@ -1,6 +1,7 @@
 ---
 name: protocol-playbook
 description: "Network protocol testing: SMB, LDAP, Kerberos, DNS, SNMP, RDP, SSH, FTP, SMTP/IMAP, MSSQL, VNC, GraphQL, and Active Directory estates. Index of 13 protocol references covering enumeration and auth weaknesses."
+mcps: ScopeSentry, browser
 ---
 
 # Protocol playbook (index)

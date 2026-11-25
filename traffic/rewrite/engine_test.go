@@ -123,11 +123,11 @@ func TestResponseActions(t *testing.T) {
 		Action{Type: ActionSetStatus, Value: "200"},
 		Action{Type: ActionReplaceBody, Regex: "denied", Value: "granted"},
 		Action{Type: ActionReplaceHeader, Name: "Set-Cookie", Regex: "; Secure", Value: ""},
-		setHeader("Server", "artex"),
+		setHeader("Server", "eyeofg0d"),
 		Action{Type: ActionDeleteHeader, Name: "X-Absent"}))
 	res := s.Apply(PhaseResponse, Input{Request: req, Response: resp})
 	got := res.Response
-	if got.Status != 200 || string(got.Body) != "granted" || !reflect.DeepEqual(got.Header, http.Header{"Server": {"artex"}, "Set-Cookie": {"a=1", "b=2"}}) {
+	if got.Status != 200 || string(got.Body) != "granted" || !reflect.DeepEqual(got.Header, http.Header{"Server": {"eyeofg0d"}, "Set-Cookie": {"a=1", "b=2"}}) {
 		t.Fatalf("status=%d body=%q header=%v", got.Status, got.Body, got.Header)
 	}
 	// Fixed order within a rule, whatever the order it lists its actions in;

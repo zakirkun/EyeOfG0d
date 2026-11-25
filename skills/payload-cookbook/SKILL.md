@@ -1,6 +1,7 @@
 ---
 name: payload-cookbook
 description: "Payload syntax and bypass variants rather than strategy: SQLi, XSS, SSTI, SSRF, LFI, command injection, XXE, LDAP/XPath injection, HTTP parameter pollution, SSI, CSV formula injection, ReDoS. Index of 13 payload references."
+mcps: ScopeSentry, browser
 ---
 
 # Payload cookbook (index)

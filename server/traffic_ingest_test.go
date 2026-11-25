@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Autumn-27/artex/traffic"
+	"github.com/zakirkun/EyeOfG0d/traffic"
 )
 
 // ingestServer wires a Server with a live traffic store, like

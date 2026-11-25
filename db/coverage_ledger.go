@@ -8,7 +8,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/Autumn-27/artex/knowledge"
+	"github.com/zakirkun/EyeOfG0d/knowledge"
 )
 
 // Coverage ledger (modeled on Strix strix/report/coverage.py, skill_coverage_gaps).

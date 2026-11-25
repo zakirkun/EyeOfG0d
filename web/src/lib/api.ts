@@ -118,7 +118,7 @@ const MAX_CHAT_UPLOAD_BYTES = 512 * 1024 * 1024;
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("artex_token");
+  return localStorage.getItem("eyeofg0d_token");
 }
 
 // ApiError is what http() throws for a non-2xx response: the message is the
@@ -146,8 +146,8 @@ export async function http<T>(path: string, init?: RequestInit): Promise<T> {
   });
   if (r.status === 401) {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("artex_token");
-      document.cookie = "artex_token=; path=/; max-age=0";
+      localStorage.removeItem("eyeofg0d_token");
+      document.cookie = "eyeofg0d_token=; path=/; max-age=0";
       window.location.href = "/login";
     }
     throw new Error("Unauthorized");
@@ -184,12 +184,12 @@ export async function http<T>(path: string, init?: RequestInit): Promise<T> {
 // to the Go backend on :8787, whose CORS is open.
 //
 // Override either default with NEXT_PUBLIC_SSE_BASE (set it to "" to force same-origin).
-// A same-origin stream sends the artex_token cookie. The query token is added only
+// A same-origin stream sends the eyeofg0d_token cookie. The query token is added only
 // when base is non-empty, which is the dev connection to :8787: that origin cannot
 // send the cookie.
 // mockReport returns a canned Markdown report for the demo.
 function mockReport(_task?: string): string {
-  return `# ARTEX Penetration Test Report — Acme Corp
+  return `# EyeOfG0d Penetration Test Report — Acme Corp
 
 ## Overview
 - Scope: acme.com (incl. www / admin / api / shop / vpn subdomains)

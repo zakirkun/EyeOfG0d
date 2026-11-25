@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Autumn-27/artex/db"
 	actool "github.com/Autumn-27/norma/tool"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 // recordCoverage writes one coverage-ledger entry (db/coverage_ledger.go). It is a

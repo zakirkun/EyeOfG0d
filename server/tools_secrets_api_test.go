@@ -129,7 +129,7 @@ func TestCustomToolExecMasking(t *testing.T) {
 		t.Fatalf("create: HTTP %d %s", resp.Code, resp.Body.String())
 	}
 	var raw string
-	if err := pg.QueryRow(`SELECT exec::text FROM tools WHERE key='t_secexec'`).Scan(&raw); err != nil || !strings.Contains(raw, "__artex_enc") {
+	if err := pg.QueryRow(`SELECT exec::text FROM tools WHERE key='t_secexec'`).Scan(&raw); err != nil || !strings.Contains(raw, "__eyeofg0d_enc") {
 		t.Fatalf("exec not sealed at rest: %s %v", raw, err)
 	}
 

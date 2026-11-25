@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 // CRUD for task-level asset intercept/allow rules. Rules belong to a task_id

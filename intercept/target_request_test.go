@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 func TestPendingWakesAllWaiters(t *testing.T) {
@@ -223,7 +223,7 @@ func TestConcurrentCallsSameHostShareOneRequest(t *testing.T) {
 
 	// Decided on the second instance: its own waiter is woken by the channel,
 	// the waiters of the first instance by their poll.
-	if err := second.Decide(id, true, "ARTEX", "198.51.100.9"); err != nil {
+	if err := second.Decide(id, true, "EyeOfG0d", "198.51.100.9"); err != nil {
 		t.Fatal(err)
 	}
 	for name, ch := range map[string]<-chan TargetResult{"creator": a, "attached": b, "other instance": c} {
@@ -239,7 +239,7 @@ func TestConcurrentCallsSameHostShareOneRequest(t *testing.T) {
 	if allRows(t, d, scope) != 1 || cards.Load() != 1 {
 		t.Fatalf("rows=%d cards=%d after the decision, want 1 and 1", allRows(t, d, scope), cards.Load())
 	}
-	if err := first.Decide(id, false, "ARTEX", ""); err != ErrAlreadyDecided {
+	if err := first.Decide(id, false, "EyeOfG0d", ""); err != ErrAlreadyDecided {
 		t.Fatalf("second decision: %v, want ErrAlreadyDecided", err)
 	}
 }
@@ -273,7 +273,7 @@ func TestWaiterLeavingKeepsRequestOpen(t *testing.T) {
 	if ids := openRows(t, d, scope); !slices.Equal(ids, []int64{id}) {
 		t.Fatalf("open requests = %v, want the same row %d", ids, id)
 	}
-	if err := ic.Decide(id, true, "ARTEX", ""); err != nil {
+	if err := ic.Decide(id, true, "EyeOfG0d", ""); err != nil {
 		t.Fatal(err)
 	}
 	if res := result(t, again); res.Code != "" {
@@ -409,7 +409,7 @@ func TestDecidePinsDisplayedIPs(t *testing.T) {
 		!slices.Equal(shown.Audit.Targets[0].ResolvedIPs, []string{"203.0.113.8", "203.0.113.7"}) || strings.Contains(shown.Reason, "198.51.100.66") {
 		t.Fatalf("displayed request = %+v, %v; want the creator's addresses only", shown, err)
 	}
-	if err := ic.Decide(id, true, "ARTEX", "198.51.100.9"); err != nil {
+	if err := ic.Decide(id, true, "EyeOfG0d", "198.51.100.9"); err != nil {
 		t.Fatal(err)
 	}
 	if res := result(t, creator); res.Code != "" {
@@ -431,7 +431,7 @@ func TestDeniedRequestPinsNothing(t *testing.T) {
 	tgt := target("app.example.com", 443, "203.0.113.7")
 	call := request(context.Background(), ic, scope, nil, tgt)
 	id := oneOpenRow(t, d, scope)
-	if err := ic.Decide(id, false, "ARTEX", "198.51.100.9"); err != nil {
+	if err := ic.Decide(id, false, "EyeOfG0d", "198.51.100.9"); err != nil {
 		t.Fatal(err)
 	}
 	if res := result(t, call); res.Code != TargetDenied || res.PendingID != id {
@@ -442,14 +442,14 @@ func TestDeniedRequestPinsNothing(t *testing.T) {
 	}
 	row, err := d.GetInterceptDetail(id)
 	if err != nil || row == nil || row.Status != "denied" || row.DecidedBy != "human" || row.Audit.Targets[0].Outcome != "denied" ||
-		row.Audit.Approver != "ARTEX" || row.Audit.ApproverAddr != "198.51.100.9" {
+		row.Audit.Approver != "EyeOfG0d" || row.Audit.ApproverAddr != "198.51.100.9" {
 		t.Fatalf("denied row = %+v, %v", row, err)
 	}
 	// No sticky denial: the next call asks again, on a new row.
 	next := request(context.Background(), ic, scope, nil, tgt)
 	if fresh := oneOpenRow(t, d, scope); fresh == id {
 		t.Fatal("the next call reused the denied row")
-	} else if err := ic.Decide(fresh, true, "ARTEX", ""); err != nil {
+	} else if err := ic.Decide(fresh, true, "EyeOfG0d", ""); err != nil {
 		t.Fatal(err)
 	}
 	if res := result(t, next); res.Code != "" {
@@ -472,7 +472,7 @@ func TestAttachedWaiterRequeuesAfterMergedDenial(t *testing.T) {
 			merged := oneOpenRow(t, d, scope)
 			attached := request(context.Background(), ic, scope, nil, tgt)
 			eventually(t, "both calls to wait", func() bool { return waiters(ic, merged) == 2 })
-			if err := ic.Decide(merged, false, "ARTEX", ""); err != nil {
+			if err := ic.Decide(merged, false, "EyeOfG0d", ""); err != nil {
 				t.Fatal(err)
 			}
 			if res := result(t, creator); res.Code != TargetDenied || !res.AskMerged {
@@ -491,7 +491,7 @@ func TestAttachedWaiterRequeuesAfterMergedDenial(t *testing.T) {
 				t.Fatalf("retry row = %+v, %v; want a plain target request", plain, err)
 			}
 			stillWaiting(t, attached)
-			if err := ic.Decide(retry, approveRetry, "ARTEX", ""); err != nil {
+			if err := ic.Decide(retry, approveRetry, "EyeOfG0d", ""); err != nil {
 				t.Fatal(err)
 			}
 			res := result(t, attached)
@@ -548,18 +548,18 @@ func TestDecideRecordsApproverAndAddress(t *testing.T) {
 	scope := taskScope(t, d, ic, time.Minute)
 	call := request(context.Background(), ic, scope, nil, target("app.example.com", 443, "203.0.113.7"))
 	id := oneOpenRow(t, d, scope)
-	if err := ic.Decide(id, true, "ARTEX", "198.51.100.9"); err != nil {
+	if err := ic.Decide(id, true, "EyeOfG0d", "198.51.100.9"); err != nil {
 		t.Fatal(err)
 	}
 	if res := result(t, call); res.Code != "" {
 		t.Fatalf("approved call: %+v", res)
 	}
 	got := pins(t, d, scope)
-	if len(got) != 1 || got[0].DecidedBy != "ARTEX" || got[0].DecidedFrom != "198.51.100.9" {
+	if len(got) != 1 || got[0].DecidedBy != "EyeOfG0d" || got[0].DecidedFrom != "198.51.100.9" {
 		t.Fatalf("pin = %+v, want the approver and the address", got)
 	}
 	row, err := d.GetInterceptDetail(id)
-	if err != nil || row == nil || row.DecidedBy != "human" || row.Audit.Approver != "ARTEX" || row.Audit.ApproverAddr != "198.51.100.9" {
+	if err != nil || row == nil || row.DecidedBy != "human" || row.Audit.Approver != "EyeOfG0d" || row.Audit.ApproverAddr != "198.51.100.9" {
 		t.Fatalf("target row = %+v, %v", row, err)
 	}
 
@@ -574,7 +574,7 @@ func TestDecideRecordsApproverAndAddress(t *testing.T) {
 		return d.QueryRow(`SELECT id FROM intercept_pending WHERE task_id=$1 AND status='pending' AND target_key IS NULL`, scope.TaskID).Scan(&classic) == nil
 	})
 	eventually(t, "the classic ask to wait", func() bool { return waiters(ic, classic) == 1 })
-	if err := ic.Decide(classic, true, "ARTEX", "198.51.100.10"); err != nil {
+	if err := ic.Decide(classic, true, "EyeOfG0d", "198.51.100.10"); err != nil {
 		t.Fatal(err)
 	}
 	select {
@@ -587,7 +587,7 @@ func TestDecideRecordsApproverAndAddress(t *testing.T) {
 	}
 	row, err = d.GetInterceptDetail(classic)
 	if err != nil || row == nil || row.Status != "allowed" || row.DecidedBy != "human" || row.Audit == nil ||
-		row.Audit.Approver != "ARTEX" || row.Audit.ApproverAddr != "198.51.100.10" || len(row.Audit.Targets) != 0 {
+		row.Audit.Approver != "EyeOfG0d" || row.Audit.ApproverAddr != "198.51.100.10" || len(row.Audit.Targets) != 0 {
 		t.Fatalf("classic row = %+v, %v; want the approver and the address in its audit", row, err)
 	}
 	if len(pins(t, d, scope)) != 1 {
@@ -613,7 +613,7 @@ func TestPinUnderGlobalProxyIsNameOnly(t *testing.T) {
 		if err != nil || row == nil {
 			t.Fatalf("request row: %+v, %v", row, err)
 		}
-		if err := ic.Decide(id, true, "ARTEX", ""); err != nil {
+		if err := ic.Decide(id, true, "EyeOfG0d", ""); err != nil {
 			t.Fatal(err)
 		}
 		if res := result(t, call); res.Code != "" {
@@ -669,7 +669,7 @@ func TestNewIPRequestShowsOldAndNewAddresses(t *testing.T) {
 	if row, err := d.GetInterceptDetail(id); err != nil || row == nil || !strings.Contains(row.Reason, "app.example.com (port not declared: every port)") {
 		t.Fatalf("port-0 request = %+v, %v; want the reason to say the port is not declared", row, err)
 	}
-	if err := ic.Decide(id, true, "ARTEX", ""); err != nil {
+	if err := ic.Decide(id, true, "EyeOfG0d", ""); err != nil {
 		t.Fatal(err)
 	}
 	if res := result(t, first); res.Code != "" {
@@ -688,7 +688,7 @@ func TestNewIPRequestShowsOldAndNewAddresses(t *testing.T) {
 	if got := row.Audit.Targets[0]; got.Reason != "new_ip" || got.PinID != v1.ID || got.PinVersion != 1 || !slices.Equal(got.PinnedIPs, []string{"203.0.113.7"}) {
 		t.Fatalf("recorded target = %+v", got)
 	}
-	if err := ic.Decide(id, true, "ARTEX", ""); err != nil {
+	if err := ic.Decide(id, true, "EyeOfG0d", ""); err != nil {
 		t.Fatal(err)
 	}
 	if res := result(t, second); res.Code != "" {
@@ -721,11 +721,11 @@ func TestSeveralTargetsNeedEveryApproval(t *testing.T) {
 			t.Fatalf("row %d = %+v, %v; want the ask merged into the first row only", n, row, err)
 		}
 	}
-	if err := ic.Decide(ids[0], true, "ARTEX", ""); err != nil {
+	if err := ic.Decide(ids[0], true, "EyeOfG0d", ""); err != nil {
 		t.Fatal(err)
 	}
 	stillWaiting(t, call)
-	if err := ic.Decide(ids[1], false, "ARTEX", ""); err != nil {
+	if err := ic.Decide(ids[1], false, "EyeOfG0d", ""); err != nil {
 		t.Fatal(err)
 	}
 	res := result(t, call)

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Autumn-27/artex/mobile"
 	actool "github.com/Autumn-27/norma/tool"
+	"github.com/zakirkun/EyeOfG0d/mobile"
 )
 
 // buildFridaScript is the agent-facing entry point for Frida instrumentation.

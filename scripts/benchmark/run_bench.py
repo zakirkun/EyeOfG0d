@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""ARTEX L3 benchmark runner.
+"""EyeOfG0d L3 benchmark runner.
 
-Runs a full ARTEX task against a known-vulnerable corpus app (default: OWASP
+Runs a full EyeOfG0d task against a known-vulnerable corpus app (default: OWASP
 Juice Shop), pulls every finding the platform produced, and judges them against
 a version-stamped ground truth with an independent LLM judge.
 
@@ -19,7 +19,7 @@ benchmark harness, Apache-2.0):
 - results are stamped with METHOD_VERSION and the ground-truth version
 
 Usage:
-  ARTEX_TOKEN=... JUDGE_API_KEY=... python3 run_bench.py \
+  EYEOFG0D_TOKEN=... JUDGE_API_KEY=... python3 run_bench.py \
       --corpus juice-shop --subject-model glm-5.3 --judge-model deepseek-chat
 
 DrostBench mode (flag oracle, judge optional):
@@ -76,7 +76,7 @@ class Api:
 
 
 def mint_jwt(key_path: str) -> str:
-    """Mint a 7-day HS256 token from the server's jwt.key (sub=ARTEX)."""
+    """Mint a 7-day HS256 token from the server's jwt.key (sub=EyeOfG0d)."""
     key = pathlib.Path(key_path).read_bytes().strip()
 
     def b64(b: bytes) -> str:
@@ -84,7 +84,7 @@ def mint_jwt(key_path: str) -> str:
 
     header = b64(json.dumps({"alg": "HS256", "typ": "JWT"}).encode())
     now = int(time.time())
-    payload = b64(json.dumps({"sub": "ARTEX", "iat": now, "exp": now + 7 * 86400}).encode())
+    payload = b64(json.dumps({"sub": "EyeOfG0d", "iat": now, "exp": now + 7 * 86400}).encode())
     sig = b64(hmac.new(key, f"{header}.{payload}".encode(), hashlib.sha256).digest())
     return f"{header}.{payload}.{sig}"
 
@@ -370,7 +370,7 @@ def write_report(out_dir: pathlib.Path, corpus: str, args, task_info, status, fi
         "findings": findings,
     }, indent=2))
     lines = [
-        f"# ARTEX benchmark run: {corpus}",
+        f"# EyeOfG0d benchmark run: {corpus}",
         f"- method `{METHOD_VERSION}`, ground truth `{args.gt_version}`, subject model `{args.subject_model}`, judge `{args.judge_model}`",
         f"- task #{task_info['id']} terminal status: {status}; scanner findings: {result['scanner_findings_total']}",
     ]
@@ -417,14 +417,14 @@ def main() -> None:
     ap.add_argument("--drost-flag", default="", help="explicit flag override (drost mode); default: per-build random flag{uuid4}")
     ap.add_argument("--deploy-only", action="store_true", help="drost mode: bring the challenge up, print URL and flag, skip the task")
     ap.add_argument("--llm-profiles", default="", help="comma-separated llm profile ids for the task chain, head first (e.g. 3,2); stamped into the result")
-    ap.add_argument("--target-host", default="127.0.0.1", help="host the task should target, as reachable from ARTEX (use 172.17.0.1 when ARTEX runs in a container)")
+    ap.add_argument("--target-host", default="127.0.0.1", help="host the task should target, as reachable from EyeOfG0d (use 172.17.0.1 when EyeOfG0d runs in a container)")
     ap.add_argument("--run-id", default=time.strftime("%Y%m%d-%H%M%S"))
     ap.add_argument("--image", default="bkimminich/juice-shop:latest")
     ap.add_argument("--port", type=int, default=13100)
     ap.add_argument("--container-port", type=int, default=3000)
     ap.add_argument("--corpus-url", help="use an already-running deployment instead of docker")
     ap.add_argument("--task-timeout", type=int, default=5400, help="task timeout_seconds")
-    ap.add_argument("--artex-url", default=os.environ.get("ARTEX_BASE", "http://localhost:8787"))
+    ap.add_argument("--eyeofg0d-url", default=os.environ.get("EYEOFG0D_BASE", "http://localhost:8787"))
     ap.add_argument("--gt-version", default="v1")
     ap.add_argument("--subject-model", default="", help="model the task's active profile runs on (for the self-judge guard); required unless --deploy-only")
     ap.add_argument("--judge-url", default=os.environ.get("JUDGE_BASE_URL", ""))
@@ -445,11 +445,11 @@ def main() -> None:
     if not args.deploy_only:
         if not args.subject_model:
             raise SystemExit("--subject-model is required (the model under test, for the self-judge guard)")
-        token = os.environ.get("ARTEX_TOKEN", "")
+        token = os.environ.get("EYEOFG0D_TOKEN", "")
         if not token:
-            key_path = os.environ.get("ARTEX_JWT_KEY", "")
+            key_path = os.environ.get("EYEOFG0D_JWT_KEY", "")
             if not key_path:
-                raise SystemExit("need ARTEX_TOKEN or ARTEX_JWT_KEY")
+                raise SystemExit("need EYEOFG0D_TOKEN or EYEOFG0D_JWT_KEY")
             token = mint_jwt(key_path)
 
     # The judge is mandatory in image mode. Drost mode always has the
@@ -492,9 +492,9 @@ def main() -> None:
         task_url = corpus_url
         if args.target_host != "127.0.0.1":
             task_url = f"http://{args.target_host}:{corpus_url.rsplit(':', 1)[1]}"
-            print(f"[corpus] task target rewritten for ARTEX reachability: {task_url}")
+            print(f"[corpus] task target rewritten for EyeOfG0d reachability: {task_url}")
 
-        api = Api(args.artex_url, token)
+        api = Api(args.eyeofg0d_url, token)
         task_info = create_task(api, args, task_url, gt)
         status = wait_task(api, task_info["id"], args.task_timeout + 1800)
         findings = fetch_findings(api, task_info["id"])

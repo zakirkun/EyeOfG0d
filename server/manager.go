@@ -16,16 +16,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/config"
-	pgdb "github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/egress"
-	"github.com/Autumn-27/artex/enrich"
-	"github.com/Autumn-27/artex/guard"
-	"github.com/Autumn-27/artex/intercept"
-	"github.com/Autumn-27/artex/traffic"
-	"github.com/Autumn-27/artex/traffic/rewrite"
 	actool "github.com/Autumn-27/norma/tool"
+	"github.com/zakirkun/EyeOfG0d/agent"
+	"github.com/zakirkun/EyeOfG0d/config"
+	pgdb "github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/egress"
+	"github.com/zakirkun/EyeOfG0d/enrich"
+	"github.com/zakirkun/EyeOfG0d/guard"
+	"github.com/zakirkun/EyeOfG0d/intercept"
+	"github.com/zakirkun/EyeOfG0d/traffic"
+	"github.com/zakirkun/EyeOfG0d/traffic/rewrite"
 )
 
 // Task is one engagement: a description + goal + its own exploration store,
@@ -323,7 +323,7 @@ const (
 	// agent/chat) have context compaction taken over by noa, replacing the built-in compaction. Read once per run; toggling affects only runs started afterwards.
 	settingNoaCompaction = "noa_compaction"
 	// Target noise profile (off|quiet|balanced|aggressive). When stored it wins over
-	// ARTEX_NOISE_PROFILE, which stays the fallback; applied at startup and on PUT.
+	// EYEOFG0D_NOISE_PROFILE, which stays the fallback; applied at startup and on PUT.
 	settingNoiseProfile = "noise_profile"
 	// defaultWebSearchBackend is used when web search is on but no backend was picked.
 	defaultWebSearchBackend = "ddgs"

@@ -3,8 +3,8 @@ package server
 import "os"
 
 // secretEnv lists the credentials read from the environment only at startup:
-// ARTEX_PG_DSN and ARTEX_SECRET_KEY by NewManager, the API keys by agent.FromEnv inside New.
-var secretEnv = []string{"ARTEX_PG_DSN", "ARTEX_SECRET_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY"}
+// EYEOFG0D_PG_DSN and EYEOFG0D_SECRET_KEY by NewManager, the API keys by agent.FromEnv inside New.
+var secretEnv = []string{"EYEOFG0D_PG_DSN", "EYEOFG0D_SECRET_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY"}
 
 // ScrubSecretEnv removes secretEnv from the process environment once startup has
 // read it. Child processes (agent shells, custom tools, MCP stdio servers) copy
@@ -22,7 +22,7 @@ func ScrubSecretEnv() {
 
 // Option configures New. Options keep the test call sites unchanged: only the
 // binary opts into scrubbing, because tests create several servers in one
-// process and still need ARTEX_PG_DSN on later calls.
+// process and still need EYEOFG0D_PG_DSN on later calls.
 type Option func(*Server)
 
 // WithSecretScrub makes New drop the startup secrets after reading them, before

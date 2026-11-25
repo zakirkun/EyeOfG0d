@@ -54,7 +54,7 @@ func TestTransportTimeoutsExceedOperationBudgets(t *testing.T) {
 //
 // The hold is lengthened past the old 60s cap only when the caller opts in:
 // a minute per run is too slow for the default suite, so the cheap 2s variant
-// asserts the ordering property while ARTEX_SIDECAR_SLOW_TEST=1 exercises the
+// asserts the ordering property while EYEOFG0D_SIDECAR_SLOW_TEST=1 exercises the
 // full duration. Both variants fail if the transport is retightened below the
 // install budget.
 func TestServerSurvivesAnUploadLongerThanTheOldCap(t *testing.T) {

@@ -26,18 +26,18 @@ func TestUntrustedBoundaryEnabled(t *testing.T) {
 		{" TRUE ", true},
 		{"anything", true},
 	} {
-		t.Setenv("ARTEX_UNTRUSTED_BOUNDARY", tc.env)
+		t.Setenv("EYEOFG0D_UNTRUSTED_BOUNDARY", tc.env)
 		if got := untrustedBoundaryEnabled(); got != tc.want {
-			t.Errorf("ARTEX_UNTRUSTED_BOUNDARY=%q: got %v, want %v", tc.env, got, tc.want)
+			t.Errorf("EYEOFG0D_UNTRUSTED_BOUNDARY=%q: got %v, want %v", tc.env, got, tc.want)
 		}
 	}
 }
 
 func TestUntrustedBoundaryEnabledWhenUnset(t *testing.T) {
-	t.Setenv("ARTEX_UNTRUSTED_BOUNDARY", "0") // registers restoration of the original value
-	os.Unsetenv("ARTEX_UNTRUSTED_BOUNDARY")
+	t.Setenv("EYEOFG0D_UNTRUSTED_BOUNDARY", "0") // registers restoration of the original value
+	os.Unsetenv("EYEOFG0D_UNTRUSTED_BOUNDARY")
 	if !untrustedBoundaryEnabled() {
-		t.Fatal("ARTEX_UNTRUSTED_BOUNDARY unset: got false, want true")
+		t.Fatal("EYEOFG0D_UNTRUSTED_BOUNDARY unset: got false, want true")
 	}
 }
 

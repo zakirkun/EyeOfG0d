@@ -13,9 +13,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/traffic"
-	"github.com/Autumn-27/artex/traffic/rewrite"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/traffic"
+	"github.com/zakirkun/EyeOfG0d/traffic/rewrite"
 )
 
 const rewriteAPI = "/api/traffic/rewrite-rules"
@@ -166,7 +166,7 @@ func TestRewriteRulesCRUD(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, col := range []string{matchers, actions} {
-		if !strings.Contains(col, `"__artex_enc"`) || strings.Contains(col, "rwapi-plain") || strings.Contains(col, "example") {
+		if !strings.Contains(col, `"__eyeofg0d_enc"`) || strings.Contains(col, "rwapi-plain") || strings.Contains(col, "example") {
 			t.Fatalf("column not sealed at rest: %s", col)
 		}
 	}
@@ -482,7 +482,7 @@ func TestRewriteRulesLoadedAtStartup(t *testing.T) {
 	}
 
 	// Not the key that sealed the rule.
-	t.Setenv("ARTEX_SECRET_KEY", base64.StdEncoding.EncodeToString([]byte(strings.Repeat("f", 32))))
+	t.Setenv("EYEOFG0D_SECRET_KEY", base64.StdEncoding.EncodeToString([]byte(strings.Repeat("f", 32))))
 	if m2, err := NewManager(t.TempDir(), ""); err == nil {
 		m2.Close()
 		t.Fatal("NewManager started under a key that cannot open the stored rules")

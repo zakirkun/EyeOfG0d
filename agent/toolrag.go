@@ -20,8 +20,8 @@ import (
 // rewrites a description or schema, and never reads the database. Off by default.
 
 const (
-	toolRAGEnv        = "ARTEX_TOOL_RAG"      // "1"/"true"/"on"/"yes" enables; anything else (incl. unset) = off
-	toolRAGTopKEnv    = "ARTEX_TOOL_RAG_TOPK" // non-core tools kept; default toolRAGDefaultK
+	toolRAGEnv        = "EYEOFG0D_TOOL_RAG"      // "1"/"true"/"on"/"yes" enables; anything else (incl. unset) = off
+	toolRAGTopKEnv    = "EYEOFG0D_TOOL_RAG_TOPK" // non-core tools kept; default toolRAGDefaultK
 	toolRAGDefaultK   = 12
 	toolRAGMinCatalog = 20 // smaller catalogs are passed through whole
 )
@@ -169,7 +169,7 @@ func toolRAGKeep(deferred []string) map[string]bool {
 	return keep
 }
 
-// applyToolRAG is the AugmentTools hook. Off unless ARTEX_TOOL_RAG is enabled.
+// applyToolRAG is the AugmentTools hook. Off unless EYEOFG0D_TOOL_RAG is enabled.
 func applyToolRAG(ctx context.Context, agentKey string, tools []actool.CoreTool, deferred []string, score ToolScorer) []actool.CoreTool {
 	switch strings.ToLower(strings.TrimSpace(os.Getenv(toolRAGEnv))) {
 	case "1", "true", "on", "yes":

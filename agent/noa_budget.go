@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"iter"
 
-	"github.com/Autumn-27/artex/sidequestion"
 	"github.com/Autumn-27/norma/llm"
+	"github.com/zakirkun/EyeOfG0d/sidequestion"
 )
 
 // noaRequestOverhead covers request framing the input estimate does not count.

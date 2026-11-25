@@ -10,11 +10,11 @@ import (
 
 func TestMarkProxyURL(t *testing.T) {
 	for in, want := range map[string]string{
-		"http://127.0.0.1:8788":            "http://artex-pace:artex-pace@127.0.0.1:8788",
+		"http://127.0.0.1:8788":            "http://eyeofg0d-pace:eyeofg0d-pace@127.0.0.1:8788",
 		"http://u:p@127.0.0.1:8788":        "http://u:p@127.0.0.1:8788",
 		"":                                 "",
 		"127.0.0.1:8788":                   "127.0.0.1:8788",
-		"socks5://proxy.example.test:1080": "socks5://artex-pace:artex-pace@proxy.example.test:1080",
+		"socks5://proxy.example.test:1080": "socks5://eyeofg0d-pace:eyeofg0d-pace@proxy.example.test:1080",
 	} {
 		if got := MarkProxyURL(in); got != want {
 			t.Errorf("MarkProxyURL(%q) = %q, want %q", in, got, want)
@@ -25,13 +25,13 @@ func TestMarkProxyURL(t *testing.T) {
 func TestIsPaceMarker(t *testing.T) {
 	enc := func(s string) string { return base64.StdEncoding.EncodeToString([]byte(s)) }
 	for v, want := range map[string]bool{
-		"Basic " + enc("artex-pace:artex-pace"):  true,
-		"basic " + enc("artex-pace:x"):           true,
-		"Basic " + enc("user:pass"):              false,
-		"Bearer " + enc("artex-pace:artex-pace"): false,
-		"Basic !!!":                              false,
-		"Basic":                                  false,
-		"":                                       false,
+		"Basic " + enc("eyeofg0d-pace:eyeofg0d-pace"):  true,
+		"basic " + enc("eyeofg0d-pace:x"):              true,
+		"Basic " + enc("user:pass"):                    false,
+		"Bearer " + enc("eyeofg0d-pace:eyeofg0d-pace"): false,
+		"Basic !!!": false,
+		"Basic":     false,
+		"":          false,
 	} {
 		if got := IsPaceMarker(v); got != want {
 			t.Errorf("IsPaceMarker(%q) = %v, want %v", v, got, want)

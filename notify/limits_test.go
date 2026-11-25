@@ -135,7 +135,7 @@ func TestFeishuUntruncatedItemStaysWithinBodyLimit(t *testing.T) {
 	const feishuBodyLimit = 20000
 
 	huge := limitsItem()
-	huge.DetailURL = "https://artex.local/function/findings/detail?id=42"
+	huge.DetailURL = "https://eyeofg0d.local/function/findings/detail?id=42"
 	// 36000 bytes of CJK: also checks that the cut lands on a character boundary.
 	huge.Summary = strings.Repeat("漏洞摘要", 3000)
 	huge.Assets = nil
@@ -150,7 +150,7 @@ func TestFeishuUntruncatedItemStaysWithinBodyLimit(t *testing.T) {
 	}{
 		{"single push", Message{Items: []Item{huge}, Limits: &Limits{}}, 0},
 		{"digest whose first item is oversized", Message{
-			Batch: true, WindowMinutes: 30, HomeURL: "https://artex.local/function/findings",
+			Batch: true, WindowMinutes: 30, HomeURL: "https://eyeofg0d.local/function/findings",
 			Items: []Item{huge, huge}, Limits: &Limits{},
 		}, 1},
 	}

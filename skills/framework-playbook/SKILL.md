@@ -1,6 +1,7 @@
 ---
 name: framework-playbook
 description: "Framework-specific attack surface once the stack is identified: Django, Flask, FastAPI, Express, Next.js, Laravel, PHP, Rails, Spring, ASP.NET, WordPress. Index of 11 references covering default paths, debug exposure, and template/ORM weaknesses."
+mcps: ScopeSentry, browser
 ---
 
 # Framework playbook (index)

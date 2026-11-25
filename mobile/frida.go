@@ -345,21 +345,21 @@ func substituteFrida(tmpl string, vars map[string]string) (string, error) {
 // title and run command are rendered by FridaScriptMarkdown, so the script body
 // stays a pure template that substituteFrida can validate.
 const tplHeader = `/*
- * ARTEX Frida script - generated deterministically.
+ * EyeOfG0d Frida script - generated deterministically.
  * Edit the copy you save, not this template.
  */
 `
 
 const tplSSLPinning = tplHeader + `
 Java.perform(function () {
-  var tag = '[artex-ssl]';
+  var tag = '[eyeofg0d-ssl]';
 
   // 1. Permissive X509TrustManager, then force it into every SSLContext.
   try {
     var X509TrustManager = Java.use('javax.net.ssl.X509TrustManager');
     var SSLContext = Java.use('javax.net.ssl.SSLContext');
     var Bypass = Java.registerClass({
-      name: 'com.artex.BypassTrustManager',
+      name: 'com.eyeofg0d.BypassTrustManager',
       implements: [X509TrustManager],
       methods: {
         checkClientTrusted: function (chain, authType) {},
@@ -385,7 +385,7 @@ Java.perform(function () {
   try {
     var HostnameVerifier = Java.use('javax.net.ssl.HostnameVerifier');
     var Verifier = Java.registerClass({
-      name: 'com.artex.BypassHostnameVerifier',
+      name: 'com.eyeofg0d.BypassHostnameVerifier',
       implements: [HostnameVerifier],
       methods: {
         verify: function (hostname, session) {
@@ -439,7 +439,7 @@ Java.perform(function () {
 
 const tplRootDetection = tplHeader + `
 Java.perform(function () {
-  var tag = '[artex-root]';
+  var tag = '[eyeofg0d-root]';
 
   // Build.TAGS: the classic "test-keys" check.
   try {
@@ -499,7 +499,7 @@ Java.perform(function () {
 
 const tplAntiDebug = tplHeader + `
 Java.perform(function () {
-  var tag = '[artex-dbg]';
+  var tag = '[eyeofg0d-dbg]';
 
   try {
     var Debug = Java.use('android.os.Debug');
@@ -529,7 +529,7 @@ Java.perform(function () {
 
 const tplMethodTrace = tplHeader + `
 Java.perform(function () {
-  var tag = '[artex-trace]';
+  var tag = '[eyeofg0d-trace]';
   var Target = Java.use('{{class}}');
 
   // Hook every overload: an app often declares the interesting work on one
@@ -579,7 +579,7 @@ Java.perform(function () {
 
 const tplClassEnum = tplHeader + `
 Java.perform(function () {
-  var tag = '[artex-classes]';
+  var tag = '[eyeofg0d-classes]';
   var pattern = '{{?pattern}}'.toLowerCase();
 
   // Java.enumerateLoadedClassesSync blocks the thread it runs on; on a large app
@@ -600,7 +600,7 @@ Java.perform(function () {
 
 const tplKeystoreDump = tplHeader + `
 Java.perform(function () {
-  var tag = '[artex-keystore]';
+  var tag = '[eyeofg0d-keystore]';
 
   try {
     var KeyStore = Java.use('java.security.KeyStore');
@@ -648,7 +648,7 @@ Java.perform(function () {
 
 const tplSharedPrefs = tplHeader + `
 Java.perform(function () {
-  var tag = '[artex-prefs]';
+  var tag = '[eyeofg0d-prefs]';
   var seen = {};
 
   // Hook the context accessor rather than reading a fixed file list: the app
@@ -694,7 +694,7 @@ Java.perform(function () {
 
 const tplIntentMonitor = tplHeader + `
 Java.perform(function () {
-  var tag = '[artex-intent]';
+  var tag = '[eyeofg0d-intent]';
 
   function describe(intent) {
     if (intent === null || intent === undefined) { return 'null'; }
@@ -752,7 +752,7 @@ Java.perform(function () {
 
 const tplWebViewHook = tplHeader + `
 Java.perform(function () {
-  var tag = '[artex-webview]';
+  var tag = '[eyeofg0d-webview]';
 
   try {
     var WebView = Java.use('android.webkit.WebView');
@@ -802,7 +802,7 @@ Java.perform(function () {
 
 const tplCryptoHook = tplHeader + `
 Java.perform(function () {
-  var tag = '[artex-crypto]';
+  var tag = '[eyeofg0d-crypto]';
 
   function hex(arr) {
     if (arr === null || arr === undefined) { return 'null'; }
@@ -856,7 +856,7 @@ Java.perform(function () {
 
 const tplBiometricBypass = tplHeader + `
 Java.perform(function () {
-  var tag = '[artex-bio]';
+  var tag = '[eyeofg0d-bio]';
 
   // BiometricPrompt (API 28+): make the success callback fire.
   try {
@@ -896,7 +896,7 @@ Java.perform(function () {
 const tplNativeHook = tplHeader + `
 // Native hooks do not need Java.perform, but the module must already be mapped.
 // This poll waits for it rather than hooking nothing.
-var tag = '[artex-native]';
+var tag = '[eyeofg0d-native]';
 var moduleName = '{{module}}';
 var symbolName = '{{symbol}}';
 

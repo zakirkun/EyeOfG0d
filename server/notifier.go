@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/notify"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/notify"
 )
 
 // Global setting keys (stored in the settings key-value table, no dedicated table needed).
@@ -21,7 +21,7 @@ const (
 	// the feature — the real enable condition is "whether any channel is configured".
 	settingNotifyEnabled = "notify_enabled"
 	// settingNotifyPublicBaseURL is the externally reachable address used to build
-	// detail back-links for vulnerabilities (e.g. https://artex.example.com). If left
+	// detail back-links for vulnerabilities (e.g. https://eyeofg0d.example.com). If left
 	// empty, messages carry no back-link button. There is no reusable external-address
 	// setting in the project, so a new one is added here.
 	settingNotifyPublicBaseURL = "notify_public_base_url"

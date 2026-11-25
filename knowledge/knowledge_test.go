@@ -378,7 +378,7 @@ func TestToolMetadataMatchesCatalog(t *testing.T) {
 		}
 		upstream[spec.Function.Name] = true
 	}
-	// artex's own tool names must not collide with the upstream sandbox tools,
+	// eyeofg0d's own tool names must not collide with the upstream sandbox tools,
 	// otherwise the metadata would describe a different tool than it names.
 	for _, ours := range []string{"record_coverage", "report_finding", "insert_assets"} {
 		if upstream[ours] {

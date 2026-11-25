@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
+	"github.com/zakirkun/EyeOfG0d/agent"
 )
 
 // PG: on an existing database whose add_task_scope row still holds the old

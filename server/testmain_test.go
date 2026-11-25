@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 // TestMain acquires a PostgreSQL advisory lock (7337741002) for the entire
@@ -18,7 +18,7 @@ func TestMain(m *testing.M) {
 	// serializing go test ./... across packages.
 	db.SuffixTestDatabase("server")
 	// Fixed test key via env: NewManager's InitSecrets then writes no key file.
-	os.Setenv("ARTEX_SECRET_KEY", "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")
+	os.Setenv("EYEOFG0D_SECRET_KEY", "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")
 	dsn, _, err := db.DSN()
 	if err != nil {
 		os.Exit(m.Run())
@@ -35,7 +35,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// skipWithoutDSN skips the test when neither ARTEX_PG_DSN nor a config file
+// skipWithoutDSN skips the test when neither EYEOFG0D_PG_DSN nor a config file
 // supplies a database, so fixtures that t.Fatal on a NewManager error skip
 // instead of failing. A configured database that cannot be reached still fails.
 func skipWithoutDSN(t *testing.T) {

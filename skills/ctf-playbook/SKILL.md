@@ -1,6 +1,7 @@
 ---
 name: ctf-playbook
 description: "CTF and lab challenges: crypto, pwn/heap/kernel exploitation, reverse engineering, forensics and steganography, misc jails and encodings, malware analysis, OSINT, web challenges, hardware/RF, blockchain. Index of 73 references. Lab use only."
+mcps: ScopeSentry, browser
 ---
 
 # CTF playbook (index)

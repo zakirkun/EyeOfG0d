@@ -31,7 +31,7 @@ import (
 
 const (
 	listenAddr   = "0.0.0.0:8090"
-	avdPrefix    = "artex-task-"
+	avdPrefix    = "eyeofg0d-task-"
 	emulatorPort = "5554"
 	// adb addresses emulators as emulator-<console-port>.
 	serial = "emulator-5554"
@@ -208,7 +208,7 @@ func newHTTPServer(h http.Handler) *http.Server {
 func newSupervisor() *supervisor {
 	root := os.Getenv("EMULATOR_STATE_DIR")
 	if root == "" {
-		root = "/var/lib/artex-emulator"
+		root = "/var/lib/eyeofg0d-emulator"
 	}
 	return &supervisor{root: root, drv: newAndroidDriver(root), states: map[string]snapshot{}}
 }

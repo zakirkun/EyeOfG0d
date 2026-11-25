@@ -1,4 +1,4 @@
-# ARTEX — Codebase Capability Map & Gap Analysis
+# EyeOfG0d — Codebase Capability Map & Gap Analysis
 
 **Baseline:** git `5ce5386` (2026-11-19), clean working tree. Every claim below was read directly from source; where a capability is *absent*, the absence was confirmed by a repo-wide search and the search pattern is stated so it can be re-run.
 
@@ -8,7 +8,7 @@
 
 ## 1. What the system actually is
 
-A single Go binary (`cmd/artex/main.go:52-54`: `-addr`, `-data`, `-proxy`) serving a JSON API plus an optionally embedded static Next.js SPA (`server/webui_embed.go:18`, build tag `embedui`), backed by **two** stores:
+A single Go binary (`cmd/eyeofg0d/main.go:52-54`: `-addr`, `-data`, `-proxy`) serving a JSON API plus an optionally embedded static Next.js SPA (`server/webui_embed.go:18`, build tag `embedui`), backed by **two** stores:
 
 - **PostgreSQL** is the system of record. `db/schema.sql` is an idempotent base that is re-executed on every startup (`db/db.go:33`, `db/db.go:63`, `db/db.go:213`).
 - **SQLite** (`modernc.org/sqlite`, `traffic/traffic.go:39`) is a sidecar **only** for the traffic index (`traffic/traffic.go:251`, FTS5 schema at `:125`).
@@ -50,7 +50,7 @@ Legend: **Real** = implemented and load-bearing; **Real, narrow** = implemented 
 | 23 | Retests | `db/finding_retests.go:188` start, `:199` result, `:226` finish (seals verdict, updates triage in-txn); schema `db/schema.sql:1216`, one-active index `:1232` | Real |
 | 24 | Trigger scheduler | `server/scheduler.go:37` 5 s tick, `:41` `Run`, `:117` `step`, `:134` `fireIntervals`; **triggers attach to CUSTOM agents only** `:21` | Real, narrow |
 | 25 | Notifications | 6 outbound sinks `notify/notify.go:22-29` (dingtalk, feishu, wecom, webhook, telegram, email); delivery retry `server/server.go:899-906`; inbound: none | Real (outbound only) |
-| 26 | Auth | `server/auth.go:585` username must equal literal `"ARTEX"`; JWT subject is the constant `ARTEX` `:190`; TTL `:28`; `requireAuth` `:287` is boolean-only | Real, single-tenant |
+| 26 | Auth | `server/auth.go:585` username must equal literal `"EyeOfG0d"`; JWT subject is the constant `EyeOfG0d` `:190`; TTL `:28`; `requireAuth` `:287` is boolean-only | Real, single-tenant |
 | 27 | Migration discipline | `db/migrate.go:20` embed, `:151` checksum rejection, `:162` append-only rejection; only `0001`–`0007` exist | Real, enforced |
 | 28 | Static-export UI | `web/next.config.mjs:24` `output: "export"`, `:26` `trailingSlash`; SPA served **without** auth `server/webui_embed.go:21` | Real |
 
@@ -74,7 +74,7 @@ Legend: **Real** = implemented and load-bearing; **Real, narrow** = implemented 
 
 ### Gap 1 — No principal, no ownership (highest cost, highest blast radius)
 
-`ARTEX` is a hardcoded username (`server/auth.go:585`) and the JWT subject is a constant (`:190`). `requireAuth` (`:287`) asks only "is this token valid?" — it attaches no principal to the request. No table has an owner column (§2 absences). The result: one token grants full destructive reach — `DELETE /api/task-archives/{id}` (`server/server.go:789`), `POST /api/tasks/control` (`:817`), `DELETE /api/assets` (`:834`), and every task's stored credentials (`GET /api/tasks/{id}/credentials`, `:782`).
+`EyeOfG0d` is a hardcoded username (`server/auth.go:585`) and the JWT subject is a constant (`:190`). `requireAuth` (`:287`) asks only "is this token valid?" — it attaches no principal to the request. No table has an owner column (§2 absences). The result: one token grants full destructive reach — `DELETE /api/task-archives/{id}` (`server/server.go:789`), `POST /api/tasks/control` (`:817`), `DELETE /api/assets` (`:834`), and every task's stored credentials (`GET /api/tasks/{id}/credentials`, `:782`).
 
 This is the largest gap versus commercial platforms and the one already named in the buyer research (`buyer-pain-points.md:116`: "SSO/SAML, RBAC/multi-project isolation"). It is also the most expensive to close: it is a column on nearly every table plus a principal threaded through roughly every handler in `server/server.go:739-1042`.
 
@@ -88,9 +88,9 @@ Commercially this is the difference between a tool you run once and a program yo
 
 ### Gap 3 — Output cannot leave the product in a form a pipeline consumes
 
-Export is exactly `md-single`, `md-zip`, `csv`, `json` (`server/server.go:2434-2468`), mirrored in the UI union type (`web/src/app/(main)/function/findings/page.tsx:288`, `web/src/lib/api.ts:604`). Notifications are outbound-only chat sinks (`notify/notify.go:22-29`). There is no SARIF, no ticket creation, no CI gate, no way for CI to *trigger* ARTEX (no inbound endpoint — §2).
+Export is exactly `md-single`, `md-zip`, `csv`, `json` (`server/server.go:2434-2468`), mirrored in the UI union type (`web/src/app/(main)/function/findings/page.tsx:288`, `web/src/lib/api.ts:604`). Notifications are outbound-only chat sinks (`notify/notify.go:22-29`). There is no SARIF, no ticket creation, no CI gate, no way for CI to *trigger* EyeOfG0d (no inbound endpoint — §2).
 
-The irony: ARTEX's evidence chain is stricter than most tools that do emit SARIF. A verified finding already carries POE ≥ 3 and a verbatim quote checked byte-for-byte against the bound response body (`server/finding_verification.go:154-162`). That rigor is trapped behind formats no scanner reads.
+The irony: EyeOfG0d's evidence chain is stricter than most tools that do emit SARIF. A verified finding already carries POE ≥ 3 and a verbatim quote checked byte-for-byte against the bound response body (`server/finding_verification.go:154-162`). That rigor is trapped behind formats no scanner reads.
 
 ### Honourable mention — recurring scans
 
@@ -156,7 +156,7 @@ Blast radius is graded **small** (≤3 files, no schema change), **medium** (sch
 
 ### D. Scoped API tokens (RBAC-lite) — **small to medium**
 
-**What:** `Authorization: Bearer artex_…` accepted alongside JWT, with two scopes — `read` and `run` — where `run` may create and control tasks but cannot delete archives, mutate settings, or read credentials.
+**What:** `Authorization: Bearer eyeofg0d_…` accepted alongside JWT, with two scopes — `read` and `run` — where `run` may create and control tasks but cannot delete archives, mutate settings, or read credentials.
 
 **Files**
 - `db/migrations/0009_api_tokens.sql` — `api_tokens(id, name, scope, hash, created_at, last_used_at, revoked_at)`.

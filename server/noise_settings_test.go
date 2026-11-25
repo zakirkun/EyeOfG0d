@@ -8,15 +8,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Autumn-27/artex/egress"
+	"github.com/zakirkun/EyeOfG0d/egress"
 )
 
 func TestNoiseProfileSettingHTTP(t *testing.T) {
 	skipWithoutDSN(t)
 	prev := egress.CurrentProfile()
 	t.Cleanup(func() { egress.SetProfile(prev) })
-	t.Setenv("ARTEX_NOISE_PROFILE", "quiet")
-	t.Setenv("ARTEX_TARGET_USER_AGENT", "artex-noise-test/1")
+	t.Setenv("EYEOFG0D_NOISE_PROFILE", "quiet")
+	t.Setenv("EYEOFG0D_TARGET_USER_AGENT", "eyeofg0d-noise-test/1")
 
 	m, err := NewManager(t.TempDir(), "")
 	if err != nil {
@@ -43,7 +43,7 @@ func TestNoiseProfileSettingHTTP(t *testing.T) {
 		t.Fatal(err)
 	}
 	m2.Close()
-	if p := egress.CurrentProfile(); p.Name != "balanced" || p.UserAgent != "artex-noise-test/1" {
+	if p := egress.CurrentProfile(); p.Name != "balanced" || p.UserAgent != "eyeofg0d-noise-test/1" {
 		t.Fatalf("NewManager with setting balanced applied %+v", p)
 	}
 	if err := m.pg.SetSetting(settingNoiseProfile, "loud"); err != nil {

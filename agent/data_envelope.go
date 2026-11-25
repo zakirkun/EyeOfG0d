@@ -18,7 +18,7 @@ import (
 // marker copied into a fact survives JSON encoding literally, where the
 // neutraliser below finds it.
 const (
-	dataMarkerStem  = "ARTEX_DATA"
+	dataMarkerStem  = "EYEOFG0D_DATA"
 	dataOpenPrefix  = "[[" + dataMarkerStem + " nonce="
 	dataClosePrefix = "[[END_" + dataMarkerStem + " nonce="
 	dataNonceBytes  = 16
@@ -29,7 +29,7 @@ const (
 // character that is not in the stem and contains no uppercase 'A', so the
 // rewritten text cannot form a new stem with its neighbours: the data can
 // neither open nor close a frame, whatever nonce it guesses.
-var dataMarkerNeutraliser = strings.NewReplacer(dataMarkerStem, "artex-data-marker-removed")
+var dataMarkerNeutraliser = strings.NewReplacer(dataMarkerStem, "eyeofg0d-data-marker-removed")
 
 // dataEnvelope frames derived fields for one user message. Build one per
 // message with newDataEnvelope; every frame in that message shares its nonce.

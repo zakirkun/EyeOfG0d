@@ -1,4 +1,4 @@
-// Code generated from the ARTEX knowledge corpus. DO NOT EDIT.
+// Code generated from the EyeOfG0d knowledge corpus. DO NOT EDIT.
 //
 // Source: knowledge/data/vuln_ontology.json + knowledge/data/ab_signals.json
 // (branch feat/airecon-knowledge-and-skills). The alias derivation mirrors

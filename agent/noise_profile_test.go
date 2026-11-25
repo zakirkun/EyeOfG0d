@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Autumn-27/artex/egress"
+	"github.com/zakirkun/EyeOfG0d/egress"
 )
 
 func TestRenderNoiseProfileOff(t *testing.T) {
@@ -41,7 +41,7 @@ func TestRenderNoiseProfileTable(t *testing.T) {
 			fmt.Sprintf("- dalfox scan: --rate-limit %d --workers %d", c.rps, c.conc),
 			fmt.Sprintf("- sqlmap: --delay=%s --threads=1", c.sql),
 			fmt.Sprintf("at least %d ms between requests", c.delay),
-			"ARTEX paces its own WebFetch, http custom tool and enrich traffic with this profile. With traffic capture on, Bash commands that use the capture proxy (curl, wget, python-requests) are paced too, by rate and jitter; raw scanners such as nmap and commands that bypass the proxy are not. These flags remain the brake: do not rely on the proxy.",
+			"EyeOfG0d paces its own WebFetch, http custom tool and enrich traffic with this profile. With traffic capture on, Bash commands that use the capture proxy (curl, wget, python-requests) are paced too, by rate and jitter; raw scanners such as nmap and commands that bypass the proxy are not. These flags remain the brake: do not rely on the proxy.",
 		} {
 			if !strings.Contains(got, want) {
 				t.Errorf("%s: missing %q in:\n%s", c.name, want, got)
@@ -62,7 +62,7 @@ func TestPromptBuildersNoiseBlock(t *testing.T) {
 	prev := egress.CurrentProfile()
 	t.Cleanup(func() { egress.SetProfile(prev) })
 	// The block follows the current profile, not the environment.
-	t.Setenv("ARTEX_NOISE_PROFILE", "aggressive")
+	t.Setenv("EYEOFG0D_NOISE_PROFILE", "aggressive")
 	egress.SetProfile(egress.Profile{Name: "off"})
 	for name, build := range builders {
 		if got := build(); strings.Contains(got, noiseProfileHeader) {

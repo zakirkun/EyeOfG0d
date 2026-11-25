@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
 	actool "github.com/Autumn-27/norma/tool"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 func callReadJSON(t *testing.T, tool actool.CoreTool, input string) any {
@@ -26,7 +26,7 @@ func callReadJSON(t *testing.T, tool actool.CoreTool, input string) any {
 }
 
 func TestGraphOverviewExpandsAssociatedCompanyScope(t *testing.T) {
-	t.Skip("known failure with a fresh database, pre-existing on unmodified upstream; tracked in BaaRai/ARTEX#9")
+	t.Skip("known failure with a fresh database, pre-existing on a clean checkout; tracked in zakirkun/EyeOfG0d#9")
 	d := testDB(t)
 	defer d.Close()
 

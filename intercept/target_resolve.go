@@ -34,7 +34,7 @@ func (i *Interceptor) SetBaseDialer(f func(ctx context.Context, network, addr st
 	i.mu.Unlock()
 }
 
-// systemResolver is the resolver of the ARTEX process. It reads the same
+// systemResolver is the resolver of the EyeOfG0d process. It reads the same
 // resolver configuration as the tools that run in the same container.
 type systemResolver struct{}
 

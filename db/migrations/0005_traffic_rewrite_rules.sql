@@ -2,7 +2,7 @@
 -- part of a task archive.
 --
 -- matchers and actions are sealed at rest by db/secrets.go (two JSON secret
--- columns): a row holds {"__artex_enc":"enc:v1:..."} in each, and an empty
+-- columns): a row holds {"__eyeofg0d_enc":"enc:v1:..."} in each, and an empty
 -- object stays in clear. Migrations run before InitSecrets, which checks the
 -- key against these columns and encrypts any plaintext row it finds.
 --

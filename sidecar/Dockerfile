@@ -1,4 +1,4 @@
-# Real Android Emulator sidecar for ARTEX.
+# Real Android Emulator sidecar for EyeOfG0d.
 #
 # This image runs a genuine QEMU-backed Android Emulator with a pinned AVD. It
 # is linux/amd64 only: the pinned system image is x86_64 and the runtime needs
@@ -47,9 +47,9 @@ ARG SDK_LICENSE_URL=https://dl.google.com/android/repository/repository2-1.xml
 
 ENV ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT} \
     ANDROID_HOME=${ANDROID_SDK_ROOT} \
-    ANDROID_USER_HOME=/var/lib/artex-emulator/android-home \
-    ANDROID_AVD_HOME=/var/lib/artex-emulator/avd \
-    EMULATOR_STATE_DIR=/var/lib/artex-emulator \
+    ANDROID_USER_HOME=/var/lib/eyeofg0d-emulator/android-home \
+    ANDROID_AVD_HOME=/var/lib/eyeofg0d-emulator/avd \
+    EMULATOR_STATE_DIR=/var/lib/eyeofg0d-emulator \
     PATH=${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/emulator:/usr/local/bin:/usr/bin:/bin \
     DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8
@@ -169,12 +169,12 @@ RUN set -eux; \
     mkdir -p "$smoke"; \
     ANDROID_AVD_HOME="$smoke" avdmanager create avd \
         --force \
-        --name artex-smoke \
+        --name eyeofg0d-smoke \
         --package 'system-images;android-35;google_apis;x86_64' \
         --device pixel_2 < /dev/null > "$smoke/create.log" 2>&1; \
     cat "$smoke/create.log"; \
-    test -f "$smoke/artex-smoke.ini"; \
-    cfg="$smoke/artex-smoke.avd/config.ini"; \
+    test -f "$smoke/eyeofg0d-smoke.ini"; \
+    cfg="$smoke/eyeofg0d-smoke.avd/config.ini"; \
     test -f "$cfg"; \
     echo "--- created AVD config ---"; \
     cat "$cfg"; \
@@ -196,10 +196,10 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends passwd; \
     rm -rf /var/lib/apt/lists/*; \
-    /usr/sbin/groupadd -g 61050 artex; \
-    /usr/sbin/useradd -u 61050 -g 61050 -m -d /var/lib/artex-emulator -s /usr/sbin/nologin artex; \
-    mkdir -p "${ANDROID_USER_HOME}" "${ANDROID_SDK_ROOT}/.android" /var/lib/artex-emulator/tasks; \
-    chown -R artex:artex "${ANDROID_USER_HOME}" /var/lib/artex-emulator "${ANDROID_SDK_ROOT}/.android"; \
+    /usr/sbin/groupadd -g 61050 eyeofg0d; \
+    /usr/sbin/useradd -u 61050 -g 61050 -m -d /var/lib/eyeofg0d-emulator -s /usr/sbin/nologin eyeofg0d; \
+    mkdir -p "${ANDROID_USER_HOME}" "${ANDROID_SDK_ROOT}/.android" /var/lib/eyeofg0d-emulator/tasks; \
+    chown -R eyeofg0d:eyeofg0d "${ANDROID_USER_HOME}" /var/lib/eyeofg0d-emulator "${ANDROID_SDK_ROOT}/.android"; \
     # The build-time assertions above ran `emulator -version` as root, which
     # creates a root-owned /tmp/android-unknown (mode 0744). At run time the
     # unprivileged user cannot stat or mkdir inside it and the emulator prints
@@ -218,14 +218,14 @@ COPY --from=build /out/emulator-sidecar /app/emulator-sidecar
 # unprivileged runtime user. `su` is available from the passwd package added
 # above (it installs /usr/bin/su on this image).
 RUN set -eux; \
-    su artex -s /bin/sh -c '"${ANDROID_SDK_ROOT}/emulator/emulator" -version' \
+    su eyeofg0d -s /bin/sh -c '"${ANDROID_SDK_ROOT}/emulator/emulator" -version' \
         | grep -Fq "version ${EMULATOR_REVISION}"; \
-    su artex -s /bin/sh -c 'test -w /tmp'; \
-    su artex -s /bin/sh -c 'test -w "${EMULATOR_STATE_DIR}"'; \
-    su artex -s /bin/sh -c '"${ANDROID_SDK_ROOT}/platform-tools/adb" version' \
+    su eyeofg0d -s /bin/sh -c 'test -w /tmp'; \
+    su eyeofg0d -s /bin/sh -c 'test -w "${EMULATOR_STATE_DIR}"'; \
+    su eyeofg0d -s /bin/sh -c '"${ANDROID_SDK_ROOT}/platform-tools/adb" version' \
         | grep -Fq 'Android Debug Bridge'
 
-USER artex
+USER eyeofg0d
 EXPOSE 8090
 
 # This health check may only claim the supervisor is alive. It is explicitly

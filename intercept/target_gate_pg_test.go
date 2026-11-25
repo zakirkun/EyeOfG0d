@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 // The tests below run the gate against PostgreSQL: the real store, the real
@@ -74,7 +74,7 @@ func approveAll(t *testing.T, d *db.DB, ic *Interceptor, scope TargetScope) {
 		t.Fatal("no open request to approve")
 	}
 	for _, id := range ids {
-		if err := ic.Decide(id, true, "ARTEX", "192.0.2.1"); err != nil {
+		if err := ic.Decide(id, true, "EyeOfG0d", "192.0.2.1"); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -252,7 +252,7 @@ func TestSeededExemptionIsVoidOnPrivateAddress(t *testing.T) {
 	if err != nil || detail == nil || !detail.Audit.Targets[0].ExemptVoid {
 		t.Fatalf("request row audit = %+v err=%v, want exempt_void", detail, err)
 	}
-	if err := second.Decide(id, false, "ARTEX", "192.0.2.1"); err != nil {
+	if err := second.Decide(id, false, "EyeOfG0d", "192.0.2.1"); err != nil {
 		t.Fatal(err)
 	}
 	if out := result(t, done); out.Code != TargetDenied {
@@ -409,7 +409,7 @@ func TestApprovalNeverPinsEmptyAddressList(t *testing.T) {
 	}
 	for _, ips := range [][]string{nil, {}, {""}} {
 		id := open("empty.example.com", ips)
-		if err := ic.Decide(id, true, "ARTEX", "192.0.2.1"); !errors.Is(err, db.ErrTargetPinEmpty) {
+		if err := ic.Decide(id, true, "EyeOfG0d", "192.0.2.1"); !errors.Is(err, db.ErrTargetPinEmpty) {
 			t.Fatalf("approve %v: err=%v, want ErrTargetPinEmpty", ips, err)
 		}
 		if row, err := d.GetInterceptPending(id); err != nil || row == nil || row.Status != "pending" {
@@ -419,7 +419,7 @@ func TestApprovalNeverPinsEmptyAddressList(t *testing.T) {
 			t.Fatalf("%d pins after a refused approval, want none", n)
 		}
 		// The request can still be denied.
-		if err := ic.Decide(id, false, "ARTEX", "192.0.2.1"); err != nil {
+		if err := ic.Decide(id, false, "EyeOfG0d", "192.0.2.1"); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -429,7 +429,7 @@ func TestApprovalNeverPinsEmptyAddressList(t *testing.T) {
 	res.set("app.example.com", "203.0.113.7")
 	pinURL(t, d, ic, scope, "https://app.example.com/")
 	id := open("app.example.com", nil)
-	if err := ic.Decide(id, true, "ARTEX", "192.0.2.1"); !errors.Is(err, db.ErrTargetPinEmpty) {
+	if err := ic.Decide(id, true, "EyeOfG0d", "192.0.2.1"); !errors.Is(err, db.ErrTargetPinEmpty) {
 		t.Fatalf("approve an empty new_ip request: err=%v, want ErrTargetPinEmpty", err)
 	}
 	if after := pins(t, d, scope); len(after) != 1 || after[0].Version != 1 || after[0].Status != db.TargetPinActive || !slices.Equal(after[0].PinnedIPs, []string{"203.0.113.7"}) {

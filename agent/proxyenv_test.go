@@ -69,6 +69,6 @@ func TestProxyEnvMarksOnlyTheRecordingProxy(t *testing.T) {
 			t.Errorf("%s: %d proxy variables, want 6", what, n)
 		}
 	}
-	check(proxyEnv("http://127.0.0.1:8788", "/data/ca.pem"), "http://artex-pace:artex-pace@127.0.0.1:8788", "capture on")
+	check(proxyEnv("http://127.0.0.1:8788", "/data/ca.pem"), "http://eyeofg0d-pace:eyeofg0d-pace@127.0.0.1:8788", "capture on")
 	check(proxyEnv("http://u:p@10.0.0.1:3128", ""), "http://u:p@10.0.0.1:3128", "capture off")
 }

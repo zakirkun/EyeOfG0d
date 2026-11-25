@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 // ---------- P3 agent triggers (custom agents only) ----------

@@ -12,9 +12,9 @@ func countingFetch(tag string, err error, calls *int) func(context.Context) (str
 }
 
 func TestUpdateCheckOffByDefault(t *testing.T) {
-	t.Setenv("ARTEX_UPDATE_CHECK", "")
+	t.Setenv("EYEOFG0D_UPDATE_CHECK", "")
 	if updateCheckEnabled() {
-		t.Fatal("update check must be off when ARTEX_UPDATE_CHECK is unset")
+		t.Fatal("update check must be off when EYEOFG0D_UPDATE_CHECK is unset")
 	}
 	calls := 0
 	u := &updateCheck{enabled: false, fetch: countingFetch("v9.9.9", nil, &calls)}

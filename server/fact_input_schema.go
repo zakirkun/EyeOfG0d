@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/Autumn-27/artex/agent"
+	"github.com/zakirkun/EyeOfG0d/agent"
 )
 
 // SeedTool only inserts new rows. Repair existing built-ins too, while keeping

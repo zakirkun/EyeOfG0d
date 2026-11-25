@@ -4,22 +4,22 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/egress"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/egress"
 )
 
 // startupNoiseProfile is the noise profile to apply at startup: the stored
-// noise_profile setting when there is a valid one, else ARTEX_NOISE_PROFILE.
+// noise_profile setting when there is a valid one, else EYEOFG0D_NOISE_PROFILE.
 func startupNoiseProfile(pg *db.DB) egress.Profile {
 	v, ok, err := pg.GetSetting(settingNoiseProfile)
 	if err != nil {
-		log.Printf("[egress] read %s setting: %v; using ARTEX_NOISE_PROFILE", settingNoiseProfile, err)
+		log.Printf("[egress] read %s setting: %v; using EYEOFG0D_NOISE_PROFILE", settingNoiseProfile, err)
 	}
 	if ok {
 		if p, valid := egress.ProfileByName(v); valid {
 			return p
 		}
-		log.Printf("[egress] stored %s=%q is not off, quiet, balanced or aggressive; using ARTEX_NOISE_PROFILE", settingNoiseProfile, v)
+		log.Printf("[egress] stored %s=%q is not off, quiet, balanced or aggressive; using EYEOFG0D_NOISE_PROFILE", settingNoiseProfile, v)
 	}
 	return egress.ProfileFromEnv()
 }

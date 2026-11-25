@@ -38,7 +38,7 @@ func loginServer(t *testing.T, clk *fakeClock) (*Server, func(remote, password s
 	}
 	s := &Server{jwtKey: []byte("0123456789abcdef0123456789abcdef"), loginLimit: newLoginLimiter(clk.now), pwdLimit: newLoginLimiter(clk.now)}
 	post := func(remote, password string, hdr map[string]string) *httptest.ResponseRecorder {
-		body := fmt.Sprintf(`{"username":"ARTEX","password":%q}`, password)
+		body := fmt.Sprintf(`{"username":"EyeOfG0d","password":%q}`, password)
 		r := httptest.NewRequest("POST", "/api/auth/login", strings.NewReader(body))
 		r.RemoteAddr = remote
 		for k, v := range hdr {
@@ -323,7 +323,7 @@ func TestHealthHidesVersionWithoutToken(t *testing.T) {
 	w = httptest.NewRecorder()
 	s.health(w, r)
 	var body map[string]any
-	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil || body["version"] != BuildVersion || body["service"] != "artex" {
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil || body["version"] != BuildVersion || body["service"] != "eyeofg0d" {
 		t.Fatalf("valid token: body=%s want service and version", w.Body.String())
 	}
 }

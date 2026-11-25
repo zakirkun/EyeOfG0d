@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Severity mirrors the vocabulary the rest of ARTEX uses so an APK finding
+// Severity mirrors the vocabulary the rest of EyeOfG0d uses so an APK finding
 // sorts and filters alongside a web finding.
 const (
 	SeverityCritical = "critical"

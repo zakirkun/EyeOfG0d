@@ -1,5 +1,5 @@
 // Package agent wires real LLM-driven planner and work agents (on top of the
-// agent-core SDK) to the dual PostgreSQL graph. See the ARTEX architecture design doc
+// agent-core SDK) to the dual PostgreSQL graph. See the EyeOfG0d architecture design doc
 // §4.3 (planner) and §4.4 (work agent).
 //
 // Provider configuration is read from the environment so the system runs with
@@ -22,12 +22,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Autumn-27/artex/llmrec"
 	"github.com/Autumn-27/norma/agentcore"
 	"github.com/Autumn-27/norma/compaction"
 	"github.com/Autumn-27/norma/llm"
 	acperm "github.com/Autumn-27/norma/permission"
 	"github.com/Autumn-27/norma/transcript"
+	"github.com/zakirkun/EyeOfG0d/llmrec"
 )
 
 // Config describes the LLM backend resolved from the environment.
@@ -218,15 +218,15 @@ func compactionConfig(windowTokens int) *compaction.Config {
 
 // FromEnv resolves the LLM provider config:
 //
-//	ARTEX_LLM_PROVIDER = anthropic|openai|openai-responses|ollama (default: inferred from keys)
-//	ARTEX_LLM_MODEL    = model id        (default: per provider)
-//	ARTEX_LLM_BASE_URL = endpoint        (optional; ollama defaults to localhost:11434/v1)
-//	ARTEX_LLM_PROXY    = proxy URL        (optional; http/https/socks5)
+//	EYEOFG0D_LLM_PROVIDER = anthropic|openai|openai-responses|ollama (default: inferred from keys)
+//	EYEOFG0D_LLM_MODEL    = model id        (default: per provider)
+//	EYEOFG0D_LLM_BASE_URL = endpoint        (optional; ollama defaults to localhost:11434/v1)
+//	EYEOFG0D_LLM_PROXY    = proxy URL        (optional; http/https/socks5)
 //	ANTHROPIC_API_KEY / OPENAI_API_KEY         = credentials (unused for ollama)
 func FromEnv() (Config, bool) {
 	// Case- and space-insensitive: "Ollama" used to miss every case below and
 	// fall through to anthropic, sending ANTHROPIC_API_KEY to the Ollama base URL.
-	prov := strings.ToLower(strings.TrimSpace(os.Getenv("ARTEX_LLM_PROVIDER")))
+	prov := strings.ToLower(strings.TrimSpace(os.Getenv("EYEOFG0D_LLM_PROVIDER")))
 	anthKey := os.Getenv("ANTHROPIC_API_KEY")
 	oaiKey := os.Getenv("OPENAI_API_KEY")
 
@@ -242,12 +242,12 @@ func FromEnv() (Config, bool) {
 	}
 
 	c := Config{
-		BaseURL: os.Getenv("ARTEX_LLM_BASE_URL"),
-		Model:   os.Getenv("ARTEX_LLM_MODEL"),
-		Proxy:   strings.TrimSpace(os.Getenv("ARTEX_LLM_PROXY")),
-		// Streaming by default; ARTEX_LLM_STREAM=false/0/off explicitly switches to
+		BaseURL: os.Getenv("EYEOFG0D_LLM_BASE_URL"),
+		Model:   os.Getenv("EYEOFG0D_LLM_MODEL"),
+		Proxy:   strings.TrimSpace(os.Getenv("EYEOFG0D_LLM_PROXY")),
+		// Streaming by default; EYEOFG0D_LLM_STREAM=false/0/off explicitly switches to
 		// non-streaming.
-		Stream: !isFalsy(os.Getenv("ARTEX_LLM_STREAM")),
+		Stream: !isFalsy(os.Getenv("EYEOFG0D_LLM_STREAM")),
 	}
 	switch prov {
 	case "openai":

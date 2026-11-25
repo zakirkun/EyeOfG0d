@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""DrostBench v1 corpus adapter for the ARTEX L3 benchmark.
+"""DrostBench v1 corpus adapter for the EyeOfG0d L3 benchmark.
 
 DrostBench (github.com/drost-ai/drost-benchmarks, Apache-2.0) ships 100
 docker-compose web applications. Each carries one flag-bearing vulnerability

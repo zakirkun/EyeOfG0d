@@ -1,5 +1,5 @@
 # SOTA LLM-Based Offensive-Security Agent Techniques (2024–2026)
-*Compiled: 2026-11-19 | For: ARTEX roadmap feature proposal*
+*Compiled: 2026-11-19 | For: EyeOfG0d roadmap feature proposal*
 
 ## Scope & method
 - Focus: agent techniques relevant to offensive security (CTF, pentest, vuln exploitation) with 2024–2026 evidence.
@@ -56,7 +56,7 @@
 - **Context/KV efficiency (general serving techniques, apply to agents)**: prompt/context caching, prefix reuse, KV-cache compression/eviction, and concise state digests reduce repeated long-context costs — especially important for multi-turn tool traces; pair with G-CTR-like digests to keep prompts short.
 - **Early-stop & milestone gating**: use benchmark-style milestones (AutoPenBench) to halt unproductive branches and replan quickly.
 
-## 7) ARTEX roadmap recommendations (evidence-informed)
+## 7) EyeOfG0d roadmap recommendations (evidence-informed)
 1. **Hybrid orchestration**: staged planner/executor + optional specialist agents; add strategic digest/attack-graph guidance for hard targets (G-CTR evidence).
 2. **Execution-first grounding**: invest in reliable shell/browser/debugger/MCP tool interfaces and trace logging; require evidence/PoC before success (Strix/EnIGMA direction).
 3. **State & knowledge layer**: persistent task tree + artifact store + vuln/advisory retrieval (CVE context high impact per one-day study).

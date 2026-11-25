@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 // Step 2.1: the pinned dialer of the platform-owned HTTP clients. Without a

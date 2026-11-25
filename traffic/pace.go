@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Autumn-27/artex/egress"
 	mproxy "github.com/lqqyt2423/go-mitmproxy/proxy"
+	"github.com/zakirkun/EyeOfG0d/egress"
 )
 
 // paceWaitMax bounds the pacing wait of one request. Past it the request is

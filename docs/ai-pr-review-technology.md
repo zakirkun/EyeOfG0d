@@ -1,4 +1,4 @@
-# AI PR Review: REA Analysis and ARTEX Integration Plan
+# AI PR Review: REA Analysis and EyeOfG0d Integration Plan
 
 Status: research + design. No source code, prompts, or proprietary assets from the reference product are reproduced here. The analysis is based on a public client bundle observed with REA, the authenticated UI of a trial organization, and the vendor's public documentation and marketing pages. Field and enum names below come from generated client schemas and are evidence of the wire/data model, not a copy of server code.
 
@@ -18,7 +18,7 @@ The reference PR check is not a single "LLM reviews the diff" prompt. The client
 6. **GitHub output** — inline PR comments plus a check run with either annotations or status-only output; the check fails only when `fail_on.severity` is configured and an open/valid finding meets it.
 7. **Remediation** — an agent validates exploitability, writes a minimal fix, runs tests, adds a regression test, and opens a PR. A retest later marks fixes `verified_fixed` or `not_fixed`.
 
-For ARTEX, the highest-value additions are the **PR eligibility/diff layer**, **code-context index + taint candidates**, **validator pass**, **dedup/triage lifecycle**, and **check-run publisher**. The autonomous pentest graph and existing finding/retest machinery can be reused rather than duplicated.
+For EyeOfG0d, the highest-value additions are the **PR eligibility/diff layer**, **code-context index + taint candidates**, **validator pass**, **dedup/triage lifecycle**, and **check-run publisher**. The autonomous pentest graph and existing finding/retest machinery can be reused rather than duplicated.
 
 ### 1.1 Platform context
 
@@ -169,7 +169,7 @@ The remediation docs and fix schema agree:
 
 Fix record: `base_commit_sha`, `unified_diff`, `commit_message`, `pr_title`, `pr_body`, `reason`, `summary`, `cost_usd`, `task_id_cli`, and verification `{notes, reproduced, regression_test_added, test_command, test_output}`. Fix status: `dispatched`, `pr_created`, `no_fix`, `false_positive`, `failed`, `stopped_cap_exceeded`, `pr_closed`. Verification: `not_requested`, `pending`, `verified_fixed`, `not_fixed`.
 
-## 5. Data model worth mirroring in ARTEX
+## 5. Data model worth mirroring in EyeOfG0d
 
 These are client field names, not a server schema. They are still a useful target model.
 
@@ -189,16 +189,16 @@ Scan status values observed: `pending`, `running`, `completed`, `failed`, `stopp
 
 The check is deliberately **advisory by default**. A completed scan is green; findings do not block. `fail_on.severity` opts into gating. Only open or confirmed-valid findings count. Triage immediately recomputes the check, and the config is read from the default branch.
 
-For ARTEX this means the check runner must separate:
+For EyeOfG0d this means the check runner must separate:
 
 - **Scan outcome** (completed/failed/cancelled/skipped) from
 - **Gate outcome** (success/failure based on policy + current finding disposition).
 
 Keeping those independent avoids the common mistake of failing a check because the scanner crashed, or passing it because a finding was dismissed in the platform but not recomputed.
 
-## 7. ARTEX integration blueprint
+## 7. EyeOfG0d integration blueprint
 
-ARTEX today is an autonomous pentest system: Go backend, Next.js UI, PostgreSQL, dual graph (assets + exploration), planner/worker agents, traffic proxy, findings, and retests. It does **not** have a GitHub PR review subsystem. The following design adds one without turning ARTEX into a full static-analysis platform on day one.
+EyeOfG0d today is an autonomous pentest system: Go backend, Next.js UI, PostgreSQL, dual graph (assets + exploration), planner/worker agents, traffic proxy, findings, and retests. It does **not** have a GitHub PR review subsystem. The following design adds one without turning EyeOfG0d into a full static-analysis platform on day one.
 
 ### 7.1 Design principles
 
@@ -216,13 +216,13 @@ codereview/
   webhook.go      GitHub/GitLab webhook verification and event normalization
   model.go        Scan, CheckRun, PullRequest, Finding, FixRun, enums
   diff.go         unified-diff parsing, hunk→file mapping, 500-file cap
-  config.go       .artex/config.yaml (repository policy)
+  config.go       .eyeofg0d/config.yaml (repository policy)
   index.go        repository snapshot + symbol/call-graph index
-  rules.go        .artex/rules.md, org/repo rules, path/author/label filters
+  rules.go        .eyeofg0d/rules.md, org/repo rules, path/author/label filters
   analyze.go      deterministic rules + taint candidate extraction
   review.go       LLM reviewer agent (diff + context)
   validate.go     validator agent (claims, reachability, false-positive checks)
-  dynamic.go      optional verification through ARTEX target/traffic tooling
+  dynamic.go      optional verification through EyeOfG0d target/traffic tooling
   dedup.go        fingerprints + embeddings + duplicate_of
   publish.go      GitHub check run + inline annotations/comments
   fix.go          remediation run and fix-PR creation
@@ -255,7 +255,7 @@ Alternatively, extend `findings` with nullable `source`, `file`, `line`, `finger
 - `POST /api/codereview/findings/{id}/retest` — after a fix.
 - `GET /api/codereview/repos/{id}/index` — index stats and unsupported languages.
 
-Server routes in ARTEX use Go 1.22+ `mux.HandleFunc("METHOD /path/{id}", ...)`; follow that style.
+Server routes in EyeOfG0d use Go 1.22+ `mux.HandleFunc("METHOD /path/{id}", ...)`; follow that style.
 
 ### 7.5 PR lifecycle
 
@@ -280,7 +280,7 @@ Server routes in ARTEX use Go 1.22+ `mux.HandleFunc("METHOD /path/{id}", ...)`; 
 - **Fixer** (`codereview/fix.go`): input = validated finding + repo snapshot. Output = minimal unified diff, commit message, PR title/body, test command, and verification notes.
 - **Retester** (`codereview/retest.go`): re-run the reproduction or the relevant tests against the fixed commit; produce `verified_fixed` or `not_fixed`.
 
-Use ARTEX's existing `llmpool` for provider selection, per-run token budgets, retries, and usage recording. Store model/provider metadata and cost per scan, matching the reference product's `LLM calls` / `Tokens (in/out)` visibility.
+Use EyeOfG0d's existing `llmpool` for provider selection, per-run token budgets, retries, and usage recording. Store model/provider metadata and cost per scan, matching the reference product's `LLM calls` / `Tokens (in/out)` visibility.
 
 ### 7.7 Static analysis for a Go codebase
 
@@ -289,7 +289,7 @@ A pragmatic first pass:
 - **Tree-sitter** parsers for the languages you support; persist symbols, imports, and call edges.
 - **Call graph** from definitions + references (start intra-repo; mark unresolved dynamic dispatch as unknown).
 - **Taint rules** for common sources/sinks (HTTP handlers, SQL, template rendering, command execution, file paths, deserialization) with explicit sanitizers.
-- **Custom rules** from `.artex/rules.md` and repo config; allow path/label/author exclusions.
+- **Custom rules** from `.eyeofg0d/rules.md` and repo config; allow path/label/author exclusions.
 - **Dependency verdicts**: optional OSV/advisory lookup plus a known-malicious package feed, surfaced as a separate finding category.
 
 Do not claim full-program reachability when the call graph is partial. Record `unknown` for unresolved edges; this mirrors the reference product's `unsupported_languages` and call-graph limitations.
@@ -315,16 +315,16 @@ Do not claim full-program reachability when the call graph is partial. Record `u
 ### 7.10 Security, cost, and limits
 
 - **Prompt injection**: repository files, PR descriptions, and rules are untrusted; never let them override system instructions. Strip secrets before sending to a model.
-- **Code execution**: verification runs in ARTEX's existing sandbox/proxy boundary; do not execute repo code on the server host.
+- **Code execution**: verification runs in EyeOfG0d's existing sandbox/proxy boundary; do not execute repo code on the server host.
 - **Public repos**: apply redaction before publishing comments; a public comment can leak a vulnerability.
 - **Idempotency**: `(repo, head_sha)` is the scan key; triage commands are idempotent by finding/state.
 - **Cost control**: per-PR token and credit budget; fail closed to `skipped` when the budget is exhausted rather than scanning partially and publishing a misleading check.
-- **Config trust**: read `.artex/config.yaml` from the default branch, not the PR head; invalid config fails open.
+- **Config trust**: read `.eyeofg0d/config.yaml` from the default branch, not the PR head; invalid config fails open.
 - **Audit**: store the check conclusion, policy threshold, finding dispositions, and recomputation timestamps.
 
-### 7.11 Reuse map for ARTEX
+### 7.11 Reuse map for EyeOfG0d
 
-| ARTEX component | Reuse |
+| EyeOfG0d component | Reuse |
 | --- | --- |
 | `db/findings.go`, `findings` table | Status vocabulary, lists, grouping, notifications; either extend or mirror in `cr_findings` |
 | `db/finding_retests.go`, `agent/retester.go` | Retest lifecycle and `reproduced`/`fixed`/`inconclusive` verdicts |
@@ -366,13 +366,13 @@ Target URLs + auth instructions, browser verification, dynamic verdict/evidence,
 - No repository code executes outside the sandbox.
 - All state transitions are visible and auditable.
 
-## 8. Mapping: Reference behavior → ARTEX implementation
+## 8. Mapping: Reference behavior → EyeOfG0d implementation
 
-| Reference behavior | ARTEX implementation |
+| Reference behavior | EyeOfG0d implementation |
 | --- | --- |
 | GitHub App webhook + check run | New `codereview/webhook.go` + `publish.go`; GitHub App installation stored in `cr_repositories` |
 | Repo indexing + call graph | `codereview/index.go`; tree-sitter symbols + call edges; persist in `cr_symbols`/`cr_call_edges` |
-| Threat model + rules | Reuse ARTEX context documents/task context; add `.artex/rules.md` loader |
+| Threat model + rules | Reuse EyeOfG0d context documents/task context; add `.eyeofg0d/rules.md` loader |
 | Taint findings | `codereview/analyze.go` taint rules; store `taint_path` JSONB |
 | Reviewer/validator agents | `codereview/review.go` + `validate.go`; reuse `llmpool` |
 | Dynamic verification | `codereview/dynamic.go`; reuse `traffic`/intercept + sandbox |
@@ -399,4 +399,4 @@ Target URLs + auth instructions, browser verification, dynamic verdict/evidence,
 
 ## 11. License and use
 
-This document is original analysis for interoperability and research. The reference product is proprietary; do not copy its code, prompts, or assets. The reconstructed field names are factual observations of a public client schema. Any ARTEX implementation should be written independently against this behavioral specification and reviewed for license/legal compatibility before redistribution. Continuous red teaming is advertised as a third offering but has no public technical documentation; this document treats its internals as unknown and out of scope.
+This document is original analysis for interoperability and research. The reference product is proprietary; do not copy its code, prompts, or assets. The reconstructed field names are factual observations of a public client schema. Any EyeOfG0d implementation should be written independently against this behavioral specification and reviewed for license/legal compatibility before redistribution. Continuous red teaming is advertised as a third offering but has no public technical documentation; this document treats its internals as unknown and out of scope.

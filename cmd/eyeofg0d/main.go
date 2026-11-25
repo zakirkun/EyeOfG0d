@@ -1,4 +1,4 @@
-// Command artex runs the ARTEX backend: the dual PostgreSQL graph stores,
+// Command eyeofg0d runs the EyeOfG0d backend: the dual PostgreSQL graph stores,
 // the event-driven exploration engine, and the JSON HTTP API consumed by the
 // shadcn/ui frontend.
 package main
@@ -16,9 +16,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	"github.com/Autumn-27/artex/config"
-	"github.com/Autumn-27/artex/server"
+	"github.com/zakirkun/EyeOfG0d/agent"
+	"github.com/zakirkun/EyeOfG0d/config"
+	"github.com/zakirkun/EyeOfG0d/server"
 )
 
 // version is the build version, injected at release time via
@@ -74,7 +74,7 @@ func run() int {
 	if _, e := os.Stat(cfgPath); e == nil {
 		log.Printf("[config] config file: %s", cfgPath)
 	} else {
-		log.Printf("[config] config file: %s (not found — will only try the environment variable ARTEX_PG_DSN)", cfgPath)
+		log.Printf("[config] config file: %s (not found — will only try the environment variable EYEOFG0D_PG_DSN)", cfgPath)
 	}
 
 	sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -101,9 +101,9 @@ func run() int {
 	keyDir := config.KeyDir()
 	log.Printf("[config] JWT key directory: %s", keyDir)
 	// Proxies whose X-Forwarded-For the login rate limit reads; empty trusts none.
-	trusted, err := server.ParseTrustedProxies(os.Getenv("ARTEX_TRUSTED_PROXIES"))
+	trusted, err := server.ParseTrustedProxies(os.Getenv("EYEOFG0D_TRUSTED_PROXIES"))
 	if err != nil {
-		log.Printf("[config] ARTEX_TRUSTED_PROXIES: %v", err)
+		log.Printf("[config] EYEOFG0D_TRUSTED_PROXIES: %v", err)
 		return 1
 	}
 	if len(trusted) > 0 {
@@ -122,7 +122,7 @@ func run() int {
 	}
 
 	go func() {
-		log.Printf("ARTEX %s backend listening on %s (data=%s, workers=%d)", version, *addr, *dataDir, mgr.Workers())
+		log.Printf("EyeOfG0d %s backend listening on %s (data=%s, workers=%d)", version, *addr, *dataDir, mgr.Workers())
 		if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("serve: %v", err)
 		}

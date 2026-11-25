@@ -5,9 +5,9 @@ import (
 	"iter"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
 	"github.com/Autumn-27/norma/llm"
 	"github.com/google/uuid"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 // echoStreamProvider streams one message_start and one message_delta with the

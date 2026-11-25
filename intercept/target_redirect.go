@@ -98,7 +98,7 @@ func (e *redirectError) Error() string {
 	if e.res.Host != "" {
 		target = targetName(TargetRequest{Host: e.res.Host, Port: e.res.Port})
 	}
-	msg := "[ARTEX platform control, not target defense] " + e.res.Code + ": " + e.from + " redirects to " + target
+	msg := "[EyeOfG0d platform control, not target defense] " + e.res.Code + ": " + e.from + " redirects to " + target
 	if e.res.Code == TargetApprovalPending {
 		return msg + ", which is not approved for " + e.scope + ". The redirect was not followed and an approval was requested. " +
 			"Retry the same call after the approval. Do not fetch the redirect target directly or with another tool."

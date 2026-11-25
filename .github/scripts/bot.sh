@@ -4,7 +4,7 @@
 #
 # Triggers (see bot.yml):
 #   - issue opened: exactly one triage comment per issue
-#   - comment containing @artex-bot: answers that comment (works in PR
+#   - comment containing @eyeofg0d-bot: answers that comment (works in PR
 #     threads too, since issue_comment fires there)
 #   - pull request opened: one first-look review comment
 # The bot never posts an approving review and never replies to itself,
@@ -13,7 +13,7 @@ set -uo pipefail
 
 MAX_CHARS=8000
 FOOTER='---
-🤖 automated reply from the repo bot. A human maintainer reads everything. Ping me in any comment with `@artex-bot`.'
+🤖 automated reply from the repo bot. A human maintainer reads everything. Ping me in any comment with `@eyeofg0d-bot`.'
 
 log() { echo "[bot] $*"; }
 
@@ -124,7 +124,7 @@ case "$event_name" in
     title=$(jq -r '.issue.title' <<<"$ev")
     body=$(jq -r '.issue.body // ""' <<<"$ev")
     maintainer_opened=false
-    [ "$GITHUB_ACTOR" = "BaaRai" ] && maintainer_opened=true
+    [ "$GITHUB_ACTOR" = "zakirkun" ] && maintainer_opened=true
     if [ "$maintainer_opened" = false ] && already_triaged "$number"; then log "issue #$number already triaged"; exit 0; fi
     [ "$maintainer_opened" = false ] && eyes "$number"
     answer=$(ask_model \
@@ -158,8 +158,8 @@ $(repo_context)" json)
   issue_comment)
     number=$(jq -r '.issue.number' <<<"$ev")
     body=$(jq -r '.comment.body' <<<"$ev")
-    question="${body#*@artex-bot}"            # strip up to the mention
-    echo "$body" | grep -qi '@artex-bot' || { log "no mention; skipping"; exit 0; }
+    question="${body#*@eyeofg0d-bot}"            # strip up to the mention
+    echo "$body" | grep -qi '@eyeofg0d-bot' || { log "no mention; skipping"; exit 0; }
     eyes "$number"
     answer=$(ask_model \
       'You are the helper bot of an open-source Go + Next.js repository (an autonomous penetration testing agent system; AGPL-3.0). Someone pinged you with a question about this repository. Answer it concisely from the repository summary, saying plainly when you are not sure and suggesting a proper issue. Never state that a file, directory or feature does not exist because it is missing from that summary: it lists directories, not every file. Maximum 180 words, plain markdown, reply in the language of the question.' \

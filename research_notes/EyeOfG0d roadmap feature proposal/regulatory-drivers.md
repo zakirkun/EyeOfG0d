@@ -1,6 +1,6 @@
 # Regulatory & Compliance Drivers for Automated, Evidence-Backed Pentest Artifacts (2025-2026)
 
-**Prepared for:** ARTEX roadmap (records real HTTP traffic as evidence per finding)  
+**Prepared for:** EyeOfG0d roadmap (records real HTTP traffic as evidence per finding)  
 **Status:** Research note, current as of **2026-11-19** (dates/timelines verified against official sources cited below).  
 **Scope:** EU CRA, NIS2, DORA, SEC cyber disclosure, PCI DSS 4.0 (11.4), ISO 27001, SOC 2, HIPAA.
 
@@ -15,7 +15,7 @@
 | Change linkage | Point-in-time snapshot | Continuous/triggered runs tied to releases/significant changes; diffable results over time |
 | Retention | Ad hoc storage | Policy-driven retention/WORM options, versioned artifacts, exportable audit packages |
 
-**ARTEX fit:** per-finding recorded real HTTP traffic can serve as primary technical evidence, enabling replayable proof, machine-readable export, and signed evidence bundles that close the gap between consultant narrative and auditor/regulator-ready proof.
+**EyeOfG0d fit:** per-finding recorded real HTTP traffic can serve as primary technical evidence, enabling replayable proof, machine-readable export, and signed evidence bundles that close the gap between consultant narrative and auditor/regulator-ready proof.
 
 ---
 
@@ -100,7 +100,7 @@
 
 ---
 
-## Key takeaways for ARTEX
+## Key takeaways for EyeOfG0d
 
 1. **Strongest explicit pentest/testing mandates:** PCI DSS 11.4 (cadence/scope/segmentation/retest) and DORA (proportional testing + TLPT for designated entities).
 2. **Mandatory regimes where testing substantiates compliance:** NIS2 (effectiveness testing/audit), CRA (technical documentation/vulnerability handling), SEC (defensible risk-management and incident processes), HIPAA (periodic evaluation/risk analysis support).

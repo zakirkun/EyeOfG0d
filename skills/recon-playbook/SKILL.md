@@ -1,6 +1,7 @@
 ---
 name: recon-playbook
 description: "Recon breadth on an authorized target: subdomain and ASN enumeration, tech fingerprinting, historical/archived data, JS and endpoint mining, exposed devtools or secrets, OSINT, dorking, internal-network recon. Index of 15 playbooks under references/."
+mcps: ScopeSentry, browser
 ---
 
 # Recon playbook (index)

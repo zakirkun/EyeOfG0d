@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/traffic/rewrite"
 	"github.com/gorilla/websocket"
 	mproxy "github.com/lqqyt2423/go-mitmproxy/proxy"
+	"github.com/zakirkun/EyeOfG0d/traffic/rewrite"
 )
 
 // --- helpers ---------------------------------------------------------------
@@ -94,7 +94,7 @@ func exchangeIDByPath(t *testing.T, tr *Traffic, suffix string) string {
 	return id
 }
 
-// logBuf captures the standard logger, where every ARTEX log goes.
+// logBuf captures the standard logger, where every EyeOfG0d log goes.
 type logBuf struct {
 	mu sync.Mutex
 	b  bytes.Buffer
@@ -1080,7 +1080,7 @@ func TestRewriteSensitiveValueNotInTrace(t *testing.T) {
 	const secret = "Bearer s3cr3t-token-value"
 	master := []byte("instance key for the test")
 	m := hmac.New(sha256.New, master)
-	m.Write([]byte("artex-traffic-trace"))
+	m.Write([]byte("eyeofg0d-traffic-trace"))
 	sub := m.Sum(nil)
 	m = hmac.New(sha256.New, sub)
 	m.Write([]byte(secret))

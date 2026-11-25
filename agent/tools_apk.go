@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Autumn-27/artex/mobile"
 	actool "github.com/Autumn-27/norma/tool"
+	"github.com/zakirkun/EyeOfG0d/mobile"
 )
 
 // analyzeAPK is the agent-facing entry point for Android package analysis.

@@ -4,11 +4,17 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Breaking changes
+
+- **Project renamed from ARTEX to EyeOfG0d**: this is a hard cutover with no compatibility aliases. Every `ARTEX_*` environment variable is now `EYEOFG0D_*` and the old names are no longer read, so a deployment that keeps them starts with defaults instead of its configuration. Existing `.env` files, compose overrides, systemd units, CI variables and wrapper scripts must be renamed before the upgrade. The Go module path is now `github.com/zakirkun/EyeOfG0d`, the binary is `eyeofg0d` (`cmd/eyeofg0d`), and the sidecar image and module are `EyeOfG0d-emulator-sidecar`.
+- **Database objects renamed**: the PostgreSQL role and database are now `eyeofg0d`. Rename them in place with `ALTER ROLE artex RENAME TO eyeofg0d` and `ALTER DATABASE artex RENAME TO eyeofg0d` before the first start; pointing the new build at the old names fails to connect. Data is preserved by an in-place rename, so there is no need to drop the volume.
+- **Session cookie renamed** to `eyeofg0d_token`, so every existing browser session is signed out and needs a fresh login.
+
 ### Added
 
-- **Target noise governor**: one shared egress governor paces ARTEX's own HTTP requests (WebFetch, the http custom tools and the enrich probe) against a noise profile (`off` by default, `quiet`, `balanced`, `aggressive`): a per-host token bucket with jitter, per-host and global in-flight caps, 429/503 backoff, GET deduplication with a short cache, and a configurable target User-Agent (`ARTEX_TARGET_USER_AGENT`). Off is a strict passthrough (#205).
+- **Target noise governor**: one shared egress governor paces EyeOfG0d's own HTTP requests (WebFetch, the http custom tools and the enrich probe) against a noise profile (`off` by default, `quiet`, `balanced`, `aggressive`): a per-host token bucket with jitter, per-host and global in-flight caps, 429/503 backoff, GET deduplication with a short cache, and a configurable target User-Agent (`EYEOFG0D_TARGET_USER_AGENT`). Off is a strict passthrough (#205).
 - **Low-and-slow prompt block**: when a noise profile is set, the planner, worker, main agent and chat prompts carry the per-host limits of the profile and the exact rate or delay flags for nmap, nuclei, httpx, katana, ffuf, dalfox and sqlmap; with the profile off the prompts are unchanged (#212).
-- **Noise profile at runtime**: System settings has a **Target noise** card. It sets the profile (`off`, `quiet`, `balanced`, `aggressive`) through the `noise_profile` setting, which takes precedence over `ARTEX_NOISE_PROFILE`. The change applies to the next WebFetch, http custom tool and enrich request, and to the next agent prompt, without a restart. The card also shows the per-host counters, which `GET /api/settings/noise` returns (#233).
+- **Noise profile at runtime**: System settings has a **Target noise** card. It sets the profile (`off`, `quiet`, `balanced`, `aggressive`) through the `noise_profile` setting, which takes precedence over `EYEOFG0D_NOISE_PROFILE`. The change applies to the next WebFetch, http custom tool and enrich request, and to the next agent prompt, without a restart. The card also shows the per-host counters, which `GET /api/settings/noise` returns (#233).
 - **Bash requests paced through the capture proxy**: with traffic capture on, the Bash proxy URL carries a marker userinfo. The recording proxy paces each request of a marked connection by the noise profile's per-host rate and jitter, and counts it, before it goes upstream. This applies inside CONNECT tunnels too. WebFetch, the http custom tools and enrich keep the unmarked URL and are not paced twice. The proxy now drops `Proxy-Authorization` from every request it forwards or records. This is best effort: only clients that honour the proxy are covered, with capture on (#234).
 - **Hierarchical budgets**, off by default: a task budget and a per-intent budget take the minimum of their own budget and the parent's remaining budget above the wrap-up reserve, planner calls count inside the task, and reaching the reserve forces a wrap-up (#206).
 - **Coverage ledger**: the worker records what it examined, ruled out or left open for each surface and risk class with `record_coverage`; gaps, unexamined classes and completeness appear in the planner context, `GET /api/tasks/{id}/coverage`, the coverage card and the Markdown report (#207).
@@ -16,13 +22,13 @@ All notable changes to this project are documented in this file. The format is b
 - **argv interception rules**: a new `match_type = argv` matches the parsed prefix of a Bash command exactly, and a pending Bash approval can create such a rule in one click; a code-owned denylist refuses programs where a prefix would allow arbitrary code (#210, #211).
 - **Scanner output ingestion**: `ingest_scan_output` parses nmap XML, nuclei JSONL, httpx JSONL and ffuf JSON, and writes assets and facts deterministically, so the model never reads the raw output (#214, #215).
 - **bbot ingestion**: a typed parser splits bbot JSONL events by `scope_distance`, only in-scope events go through `insert_assets`, and `ingest_bbot` reads the file line by line with a 64 KiB cap (#199, #200).
-- **Tool RAG**, off by default: when the bound tool list of an agent is large, only the subset relevant to the current intent is injected, as a projection that never adds or edits a tool (`ARTEX_TOOL_RAG`) (#204).
+- **Tool RAG**, off by default: when the bound tool list of an agent is large, only the subset relevant to the current intent is injected, as a projection that never adds or edits a tool (`EYEOFG0D_TOOL_RAG`) (#204).
 - **Fact provenance**: `record_fact` takes a closed `source` enum (default `inference`) and every fact carries the server-set `origin`, both shown in `recent_facts`, `list_facts` and `expand_digest` (#194).
 - **Per-message nonce envelope**: agent- and target-derived fields reach the planner and worker user messages inside a code-owned data envelope with a random nonce per message; operator input stays outside it (#195).
 - **Intercept risk score and batch approval**: a deterministic risk score (low, medium, high) is shown on each pending approval, and up to 100 pending decisions can be settled in one call, each through the existing single-decision path (#232).
 - **`ask_operator` target warning**: a request whose question names a host or URL outside the goal targets is tagged as containing target-derived text (#197).
-- **Opt-in update banner**: `ARTEX_UPDATE_CHECK` makes the backend check the latest GitHub release at most once per 24 hours and the UI show a banner; off by default (#202).
-- **Release provenance**: release archives carry GitHub build provenance attestations and a CycloneDX SBOM (`gh attestation verify <zip> --repo BaaRai/ARTEX`); release notes are the matching `CHANGELOG.md` section (#219, #201).
+- **Opt-in update banner**: `EYEOFG0D_UPDATE_CHECK` makes the backend check the latest GitHub release at most once per 24 hours and the UI show a banner; off by default (#202).
+- **Release provenance**: release archives carry GitHub build provenance attestations and a CycloneDX SBOM (`gh attestation verify <zip> --repo zakirkun/EyeOfG0d`); release notes are the matching `CHANGELOG.md` section (#219, #201).
 - **Capture-proxy rewrite rules, storage and API**: `GET`, `POST`, `PUT` and `DELETE /api/traffic/rewrite-rules` and `POST /api/traffic/rewrite-rules/{id}/toggle` manage rules that match a request or a response (method, host, URL, headers, body, status) and describe a rewrite (method, path and query, headers, body, status). Rules are validated on save, limited to 100 of which 50 enabled, created disabled, and stored in the new table `traffic_rewrite_rules` (migration `0005_traffic_rewrite_rules.sql`) with `matchers` and `actions` encrypted at rest. The value of an action marked `sensitive` is never returned, and an update sent without it keeps the stored one. The server compiles the enabled rules at startup and after every change and hands the snapshot to the proxy. The proxy applies them from the next entry. See `docs/traffic-rewrite-rules.md`.
 - **Capture-proxy rewrite rules applied**: the capture proxy applies enabled rules to each HTTP request before it is sent to the target and to each response before it reaches the client. Each action that ran is recorded in the new table `exchange_rewrites` in the same transaction as the exchange, `traffic_get` shows a `REWRITTEN` line, and `traffic_search` never finds a value a rule wrote. SSE status and headers are rewritten at the start of the stream. **WebSocket handshakes are not rewritten**: the capture library runs its hook after the upgrade, so the status and headers cannot be changed, and frames pass unchanged. **Responses of 5 MiB or more** are forwarded unchanged and not recorded in full, because the library does not call the response hook for them. Snapshots of original requests are capped at 1024 entries and 64 MiB. Replays go through the proxy, so the rules apply to them. Archives, a per-replay rule toggle, the web UI and the proof flag come later.
 - **Bulk finding status** (#298): select findings in the findings table and apply one disposition to all of them, up to 500 per call, in one transaction; each row still goes through the single-decision notification semantics and the change is mirrored onto its exploration node (#289).
@@ -35,9 +41,9 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Changed
 
-- **Password changes revoke sessions**: a password change stores a monotonic `auth.password_version` in the same transaction as the hash. Tokens carry that version, so a token from an older version is rejected, including when two changes land in the same second. `reset-password.sh` writes the same counter and requires an ARTEX restart, because the process reads the version at startup. A failed write leaves the previous session valid. Log, activity, and side-question streams re-check the token and close after the version moves. If the version cannot be read at startup, sessions are rejected until the next login reads it.
-- **Task budgets survive a restart**: planner, worker, judge, and compactor rows in `llm_usage` are counted back into `ARTEX_TASK_BUDGET_*`. A restored task already inside the wrap-up reserve only has that reserve left, so the run wraps up instead of starting another worker. The per-worker estimate is not restored and starts from the defaults (50,000 tokens and 10 turns) until a worker finishes in this process. Chat, goal decomposition, and side questions stay outside the cap.
-- **Untrusted-output boundary is now on by default**: Norma frames tool results for the worker, planner, chat and main agent unless `ARTEX_UNTRUSTED_BOUNDARY` is set to `0`, `false`, `off` or `no`. It was opt-in via `ARTEX_UNTRUSTED_BOUNDARY=1` in 0.6.0 (#166); the default flips here (#203).
+- **Password changes revoke sessions**: a password change stores a monotonic `auth.password_version` in the same transaction as the hash. Tokens carry that version, so a token from an older version is rejected, including when two changes land in the same second. `reset-password.sh` writes the same counter and requires an EyeOfG0d restart, because the process reads the version at startup. A failed write leaves the previous session valid. Log, activity, and side-question streams re-check the token and close after the version moves. If the version cannot be read at startup, sessions are rejected until the next login reads it.
+- **Task budgets survive a restart**: planner, worker, judge, and compactor rows in `llm_usage` are counted back into `EYEOFG0D_TASK_BUDGET_*`. A restored task already inside the wrap-up reserve only has that reserve left, so the run wraps up instead of starting another worker. The per-worker estimate is not restored and starts from the defaults (50,000 tokens and 10 turns) until a worker finishes in this process. Chat, goal decomposition, and side questions stay outside the cap.
+- **Untrusted-output boundary is now on by default**: Norma frames tool results for the worker, planner, chat and main agent unless `EYEOFG0D_UNTRUSTED_BOUNDARY` is set to `0`, `false`, `off` or `no`. It was opt-in via `EYEOFG0D_UNTRUSTED_BOUNDARY=1` in 0.6.0 (#166); the default flips here (#203).
 - **Versioned migrations**: the `db` package applies numbered `db/migrations/NNNN_slug.sql` files once, in order, under the schema advisory lock, and records a SHA-256 checksum in `schema_migrations`; missing, renamed, changed or out-of-order migrations fail closed (#226).
 - **Coverage graph performance**: the coverage graph batches its connector lookups (three queries instead of one per root and per company) and adds the partial index `idx_ts_icp`; on a task of about 3,000 assets the p50 dropped from 126 ms to 27 ms and the queries per call from 221 to 3 (#230).
 - **Request body bounds** (#305): JSON request bodies decode at most 32 MiB, every non-multipart body is capped, and an oversized body answers 413 instead of a generic bad request. `ReadTimeout` bounds how long headers and the body may take to arrive without cutting a handler that is already running.
@@ -81,7 +87,7 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Security
 
-- **Secrets at rest**: the credential-bearing columns and settings (LLM API keys and proxy, task credentials, MCP server env, notification channel config, search and proxy settings), the exec spec of custom tools and the evidence snapshot heads are encrypted in PostgreSQL with AES-256-GCM (`enc:v1:`) using `ARTEX_SECRET_KEY`, else `keys/secret.key`; existing plaintext rows are backfilled once at startup, and a missing or wrong key while encrypted data exists refuses to start. This protects database dumps and backups, not a running instance (#213, #216, #217, #218).
+- **Secrets at rest**: the credential-bearing columns and settings (LLM API keys and proxy, task credentials, MCP server env, notification channel config, search and proxy settings), the exec spec of custom tools and the evidence snapshot heads are encrypted in PostgreSQL with AES-256-GCM (`enc:v1:`) using `EYEOFG0D_SECRET_KEY`, else `keys/secret.key`; existing plaintext rows are backfilled once at startup, and a missing or wrong key while encrypted data exists refuses to start. This protects database dumps and backups, not a running instance (#213, #216, #217, #218).
 - **URL credentials are dropped before storage**: scan and bbot ingestion, the asset store and archive restore strip URL userinfo, so `https://user:pass@host/app` is stored and matched as `https://host/app` (#222, #223, #224).
 
 ## [0.6.0] - 2026-11-12
@@ -137,7 +143,7 @@ Machine-checked finding verification (S1), intercept decisions traced to their a
 ### Other changes
 
 - **Custom User-Agent for LLM requests**: an optional per-profile `User-Agent` (trimmed, no control characters, 256 bytes max); empty keeps the default. Part of #154, without the fixed-full-URL mode (#155).
-- **Untrusted-output boundary toggle**: `ARTEX_UNTRUSTED_BOUNDARY=1` enables Norma's framing of tool results for worker, planner, chat and main agent; off by default (#166).
+- **Untrusted-output boundary toggle**: `EYEOFG0D_UNTRUSTED_BOUNDARY=1` enables Norma's framing of tool results for worker, planner, chat and main agent; off by default (#166).
 - **Intent claim lease and fencing (S3c)**: a claim has a 15 s heartbeat, a 90 s TTL and an owner token, so a stale worker can no longer overwrite a result; in-flight intents reopen when their claim expires, not at startup (#176).
 
 ### Fixed
@@ -175,21 +181,21 @@ Login rate limiting per client IP with trusted-proxy support, a 12-character min
 
 ### Changed
 
-- **The binary listens on `127.0.0.1:8787` by default**: the `-addr` default was `:8787`, every interface. Running `artex` or `./start.sh` without `-addr` now accepts connections from the local machine only; pass `-addr :8787` to listen on every interface. Docker is unchanged: the image starts the server with `-addr :8787` inside the container, and `docker-compose.yml` already publishes it on `127.0.0.1` by default (`ARTEX_BIND_ADDR`).
+- **The binary listens on `127.0.0.1:8787` by default**: the `-addr` default was `:8787`, every interface. Running `eyeofg0d` or `./start.sh` without `-addr` now accepts connections from the local machine only; pass `-addr :8787` to listen on every interface. Docker is unchanged: the image starts the server with `-addr :8787` inside the container, and `docker-compose.yml` already publishes it on `127.0.0.1` by default (`EYEOFG0D_BIND_ADDR`).
 - **New passwords need at least 12 characters** (was 8), at first-run setup (`POST /api/auth/init` and the `/setup` page) and in `POST /api/auth/change-password`. Login does not check length, so a password set under the old minimum keeps working until it is changed. `reset-password.sh` enforces the same minimum.
 
 ### Fixed
 
-- **The JWT signing key survives container rebuilds**: the server wrote `jwt.key` to the executable's directory, `/app` in the image, so the key lived in the container's writable layer and recreating the container (for example `docker compose up -d --build`) generated a new key and signed every user out. The key directory is now set by `ARTEX_JWT_KEY_DIR` (default: the executable's directory, unchanged for non-Docker installs). `docker-compose.yml` sets it to `/app/keys` and bind-mounts `./keys` there, outside `./data`, which the file manager browses. On start, when `<key dir>/jwt.key` is missing, a key at `data/jwt.key`, then at the executable's directory, is copied there with mode 0600 and the old file is removed; otherwise a new key is generated. An existing key is never overwritten. Upgrading a Docker install signs every user out once, because the old key is in the container being replaced; to keep sessions, copy it out before recreating the container:
+- **The JWT signing key survives container rebuilds**: the server wrote `jwt.key` to the executable's directory, `/app` in the image, so the key lived in the container's writable layer and recreating the container (for example `docker compose up -d --build`) generated a new key and signed every user out. The key directory is now set by `EYEOFG0D_JWT_KEY_DIR` (default: the executable's directory, unchanged for non-Docker installs). `docker-compose.yml` sets it to `/app/keys` and bind-mounts `./keys` there, outside `./data`, which the file manager browses. On start, when `<key dir>/jwt.key` is missing, a key at `data/jwt.key`, then at the executable's directory, is copied there with mode 0600 and the old file is removed; otherwise a new key is generated. An existing key is never overwritten. Upgrading a Docker install signs every user out once, because the old key is in the container being replaced; to keep sessions, copy it out before recreating the container:
 
   ```bash
   mkdir -p keys
-  docker cp artex-artex-1:/app/jwt.key ./keys/jwt.key
+  docker cp eyeofg0d-eyeofg0d-1:/app/jwt.key ./keys/jwt.key
   ```
 
 ### Security
 
-- **Login rate limit**: `POST /api/auth/login` allows 10 attempts per minute per client IP. The next attempt gets 429 with a `Retry-After` header (seconds) and a JSON error, and the IP is blocked for 1 minute. Each attempt while blocked, and each later block, doubles the wait, up to 15 minutes. A successful login clears the IP's count. There is no per-account lockout, so failing logins cannot lock the admin out from other addresses. The state is in memory: a restart clears it, an IP idle for 15 minutes is dropped, and at most 10,000 IPs are tracked (the least recently seen is dropped first). The IP is the TCP peer address, and `X-Forwarded-For` is ignored, unless the peer is listed in the new `ARTEX_TRUSTED_PROXIES` (comma-separated CIDRs, empty by default, passed through by `docker-compose.yml`). For a listed peer the header is read from the right and the first address that is not a trusted proxy is the client; entries the client added further left are never used. Behind a reverse proxy, set it: otherwise every client has the proxy's address and shares one budget, and an attacker failing logins through the proxy blocks the real users, admin included, for up to 15 minutes. The README nginx example now sends `X-Forwarded-For`.
+- **Login rate limit**: `POST /api/auth/login` allows 10 attempts per minute per client IP. The next attempt gets 429 with a `Retry-After` header (seconds) and a JSON error, and the IP is blocked for 1 minute. Each attempt while blocked, and each later block, doubles the wait, up to 15 minutes. A successful login clears the IP's count. There is no per-account lockout, so failing logins cannot lock the admin out from other addresses. The state is in memory: a restart clears it, an IP idle for 15 minutes is dropped, and at most 10,000 IPs are tracked (the least recently seen is dropped first). The IP is the TCP peer address, and `X-Forwarded-For` is ignored, unless the peer is listed in the new `EYEOFG0D_TRUSTED_PROXIES` (comma-separated CIDRs, empty by default, passed through by `docker-compose.yml`). For a listed peer the header is read from the right and the first address that is not a trusted proxy is the client; entries the client added further left are never used. Behind a reverse proxy, set it: otherwise every client has the proxy's address and shares one budget, and an attacker failing logins through the proxy blocks the real users, admin included, for up to 15 minutes. The README nginx example now sends `X-Forwarded-For`.
 - **`GET /api/health` hides the version from anonymous callers**: without a valid token it answers `{"ok":true}` only. With a token (the web UI sends one for the version in its top bar) the answer is unchanged: `ok`, `service` and `version`.
 
 ## [0.5.0] - 2026-11-04
@@ -199,19 +205,19 @@ Ollama support, a setup token for the first-run claim, secret scrubbing for chil
 ### Added
 
 - **Ollama support**: an `ollama` LLM profile format for a local or LAN Ollama server. Keyless by design: no API key is needed, `OPENAI_API_KEY` is never inherited, the base URL defaults to `http://127.0.0.1:11434/v1` and is normalized to the `/v1` root, and the profile works in the failover pool, task LLM chains, model listing and connection tests. Contributed by @glauberportella (#128).
-- **Setup token for first-run setup**: while no admin password is set, the server generates a random 128-bit one-time token at startup and prints it to its log (`docker compose logs artex | grep "Setup token"`). The `/setup` page has a field for it, `POST /api/auth/init` requires it (`setup_token`, compared in constant time, 403 when missing or wrong), and it is cleared once the password is stored (#137).
-- **`ARTEX_BIND_ADDR`**: the address `docker-compose.yml` publishes the web UI on, default `127.0.0.1` (#137).
+- **Setup token for first-run setup**: while no admin password is set, the server generates a random 128-bit one-time token at startup and prints it to its log (`docker compose logs eyeofg0d | grep "Setup token"`). The `/setup` page has a field for it, `POST /api/auth/init` requires it (`setup_token`, compared in constant time, 403 when missing or wrong), and it is cleared once the password is stored (#137).
+- **`EYEOFG0D_BIND_ADDR`**: the address `docker-compose.yml` publishes the web UI on, default `127.0.0.1` (#137).
 
 ### Security
 
-- **First-run claim**: before, anyone who reached port 8787 on a fresh install before the operator could set the admin password. Init now needs the setup token above, and Docker installs publish 8787 on `127.0.0.1` by default; set `ARTEX_BIND_ADDR=0.0.0.0` in `.env`, or use a reverse proxy or SSH tunnel, for remote access (#137).
-- **Startup secrets removed from the environment**: `ARTEX_PG_DSN`, `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` are unset inside `server.New` after they are read and before the MCP discovery goroutine and the task resume loop start, so agent shells, MCP stdio servers and custom tools spawned afterwards no longer inherit them (#136). The binary passes the option that enables this, but `New` did not apply its options, so the scrub from #136 never ran until #146 fixed it (#146). See Known issues for what this does not cover.
+- **First-run claim**: before, anyone who reached port 8787 on a fresh install before the operator could set the admin password. Init now needs the setup token above, and Docker installs publish 8787 on `127.0.0.1` by default; set `EYEOFG0D_BIND_ADDR=0.0.0.0` in `.env`, or use a reverse proxy or SSH tunnel, for remote access (#137).
+- **Startup secrets removed from the environment**: `EYEOFG0D_PG_DSN`, `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` are unset inside `server.New` after they are read and before the MCP discovery goroutine and the task resume loop start, so agent shells, MCP stdio servers and custom tools spawned afterwards no longer inherit them (#136). The binary passes the option that enables this, but `New` did not apply its options, so the scrub from #136 never ran until #146 fixed it (#146). See Known issues for what this does not cover.
 - **Saved API keys go only to their own endpoint**: `POST /api/llm/test` and `POST /api/llm/models` used a saved key (the profile's, or the global one) for any `base_url` in the request body, so a crafted request could send it to another host. A saved key is now sent only when the request's provider and normalized base URL match the ones it was saved for; otherwise the request must carry `api_key` (#142).
-- **`ARTEX_LLM_PROVIDER` is matched case-insensitively**: `Ollama` or a value with surrounding spaces fell through to the Anthropic default and sent `ANTHROPIC_API_KEY` to the configured base URL (#140).
+- **`EYEOFG0D_LLM_PROVIDER` is matched case-insensitively**: `Ollama` or a value with surrounding spaces fell through to the Anthropic default and sent `ANTHROPIC_API_KEY` to the configured base URL (#140).
 
 ### Fixed
 
-- **Ollama base URL on the environment path**: `ARTEX_LLM_BASE_URL=http://host:11434` is normalized to the `/v1` root the same way the saved-profile path already was, so a LAN Ollama server configured through the environment no longer answers 404 on chat (direct commit 1c35c9c).
+- **Ollama base URL on the environment path**: `EYEOFG0D_LLM_BASE_URL=http://host:11434` is normalized to the `/v1` root the same way the saved-profile path already was, so a LAN Ollama server configured through the environment no longer answers 404 on chat (direct commit 1c35c9c).
 - **Malformed `config.json` is an error**: `config.Load` used to ignore a parse error and treat the file as missing, which surfaced as a misleading "no database config found" or a silently ignored `skill_dir`. A read or parse error is now returned with the file path and startup exits (#141).
 - **`install.sh` escapes what it writes**: the local install writes `config.json` string values through a JSON escaper and requires a numeric port; the Docker install escapes `\`, `|` and `&` in the Postgres password and API key before the `.env` substitution (#141).
 - **`scripts/backup.sh --keep 0` is rejected**: it used to delete every dump, including the one just written, and still report success. Values with a leading zero are rejected too (#139).
@@ -219,8 +225,8 @@ Ollama support, a setup token for the first-run claim, secret scrubbing for chil
 
 ### Build and CI
 
-- **The image is built from the checkout instead of pulled**: `docker-compose.yml` no longer references the `autumn27/artex` namespace, whose repository is gone and whose name its holder could republish at any time. `install.sh` and `update.sh` build the image locally (direct commit 1ed154e).
-- **A fresh clone builds the image**: the Dockerfile copied a prebuilt `dist/<arch>/artex` that a clean checkout does not have. It is now a multi-stage build: a Node 22 stage runs the frontend static export, a Go 1.26 stage runs `build.sh` with the release binaries job's flags (CGO-free cross-compile, `-trimpath`, version stamp), and the runtime stage copies the result (#147).
+- **The image is built from the checkout instead of pulled**: `docker-compose.yml` no longer references the `autumn27/eyeofg0d` namespace, whose repository is gone and whose name its holder could republish at any time. `install.sh` and `update.sh` build the image locally (direct commit 1ed154e).
+- **A fresh clone builds the image**: the Dockerfile copied a prebuilt `dist/<arch>/eyeofg0d` that a clean checkout does not have. It is now a multi-stage build: a Node 22 stage runs the frontend static export, a Go 1.26 stage runs `build.sh` with the release binaries job's flags (CGO-free cross-compile, `-trimpath`, version stamp), and the runtime stage copies the result (#147).
 - **`update.sh` refuses to rebuild stale code**: when `git pull --ff-only` fails on a diverged clone (including every clone made before the 2026-10-23 history rewrite), it now stops with recovery commands instead of warning, rebuilding the old tree and printing "Build complete" (direct commit 1ed154e).
 - **CI runs the race detector and shellcheck**: `go test -race -p 1` over every package with tests except `./server`, and `shellcheck -S warning` on `install.sh`, `update.sh`, `start.sh` and `scripts/backup.sh` (#144). The race run uses its own database (direct commit 0477751).
 
@@ -231,9 +237,9 @@ Ollama support, a setup token for the first-run claim, secret scrubbing for chil
 
 ### Known issues
 
-- **The secret scrub has limits**: `os.Unsetenv` changes only the Go runtime's copy, so a process running as the same user can still read `/proc/<pid>/environ` of the server (and, in Docker, of PID 1, `start.sh`). Other variables that may carry credentials, such as `ARTEX_LLM_PROXY`, are not scrubbed.
+- **The secret scrub has limits**: `os.Unsetenv` changes only the Go runtime's copy, so a process running as the same user can still read `/proc/<pid>/environ` of the server (and, in Docker, of PID 1, `start.sh`). Other variables that may carry credentials, such as `EYEOFG0D_LLM_PROXY`, are not scrubbed.
 - **The LLM test and model-list endpoints still take `proxy` from the request**, so a saved key can travel through a request-supplied proxy when the base URL is plain HTTP.
-- **Postgres passwords with URL-special characters** (`@`, `/`, `#`, `?`) break the `ARTEX_PG_DSN` that `docker-compose.yml` builds by interpolation, and Compose interpolates `$` in `.env`.
+- **Postgres passwords with URL-special characters** (`@`, `/`, `#`, `?`) break the `EYEOFG0D_PG_DSN` that `docker-compose.yml` builds by interpolation, and Compose interpolates `$` in `.env`.
 - **The build context includes local secrets**: `.dockerignore` does not exclude `.env`, `config.json` or `jwt.key`, so the build stage's `COPY . .` puts them in a build-stage layer of the local builder cache. They are not copied into the final image.
 - **Image supply chain**: the recon tools are downloaded at pinned versions but not checksum-verified, sqlmap tracks its default branch, and the Playwright packages are installed at `@latest`. Draft #127 proposes checksum verification.
 - **No Docker image is published for this release**: the release workflow's `docker` job only runs when `DOCKERHUB_ENABLED` is set, and it still downloads prebuilt binaries into `dist/` that the Dockerfile no longer uses. Build the image from the checkout with `docker compose up -d --build`.
@@ -242,7 +248,7 @@ Ollama support, a setup token for the first-run claim, secret scrubbing for chil
 
 ## [0.4.0] - 2026-10-23
 
-First release of this fork. The engine underneath is still upstream's, but this tree carries a long stretch of operational work on top of it: a recon toolbox and skills, findings discipline, cost accounting, and container packaging.
+First release. The engine carries a long stretch of operational work on top of the base it started from: a recon toolbox and skills, findings discipline, cost accounting, and container packaging.
 
 ### Added
 
@@ -300,7 +306,7 @@ First release of this fork. The engine underneath is still upstream's, but this 
 
 - **Fixed a mask bypass via "change the target URL, keep the credentials" (Critical)**: config merging preserved the stored value for any "unmentioned key", so changing only the address while saying nothing about credentials would make the server send the real stored credentials to an arbitrary address, completely silently. Now, once the target address changes, every credential field must be stated explicitly — provide a new value, or explicitly leave it empty to indicate it is no longer needed.
 - **Fixed markdown-based channels performing zero escaping of untrusted content**: vulnerability titles and summaries come from model output, and asset URLs come from scan results, so crafted titles would render as clickable external links in DingTalk / WeCom / Feishu, and image syntax would be fetched by clients at render time, leaking the reader's IP. Now everything is single-lined + markdown metacharacters are escaped, and escaping happens at each channel's render exit point rather than in the shared title function.
-- **Fixed the SSRF surface of delivery addresses**: previously loopback, internal, and cloud metadata addresses were all deliverable, and the first 200 bytes of a failed response body went into `last_error` and were echoed in the delivery history, forming a semi-blind read primitive. Defenses now apply **at the dial stage**, covering DNS rebinding and rejecting cross-host redirects; loopback and link-local addresses require explicitly setting `ARTEX_NOTIFY_ALLOW_LOCAL=1`, while RFC1918 private networks are still allowed (self-hosted internal SMTP relays are common).
+- **Fixed the SSRF surface of delivery addresses**: previously loopback, internal, and cloud metadata addresses were all deliverable, and the first 200 bytes of a failed response body went into `last_error` and were echoed in the delivery history, forming a semi-blind read primitive. Defenses now apply **at the dial stage**, covering DNS rebinding and rejecting cross-host redirects; loopback and link-local addresses require explicitly setting `EYEOFG0D_NOTIFY_ALLOW_LOCAL=1`, while RFC1918 private networks are still allowed (self-hosted internal SMTP relays are common).
 - **Fixed push credentials leaking through error messages**: DingTalk's `access_token`, WeCom's `key`, and Telegram's bot token all live in the URL, and on delivery failure the full URL flowed into four places: `last_error`, delivery history, server logs, and frontend messages. Now uniformly redacted, keeping only `scheme://host` and the underlying reason.
 - **Fixed silent loss when a truncated digest message marked the whole batch as sent**: truncated-off vulnerabilities were neither in the message nor in the failure list, yet the delivery history showed success. Packing is now done **per whole item** — only those packed into this message are marked; the rest go back to the queue to continue in the next message without consuming retry attempts, and the message header states how many more will follow.
 - **Fixed a typo in the minimum severity threshold silently disabling the filter**: when `min_severity` was mistyped as something like `hgih`, the unknown severity's ordinal was 0, the check degenerated to always-true, and users who thought they would only receive High-severity findings actually got every vulnerability poured into the group. The write path now validates the value and lists the allowed options.
@@ -681,13 +687,13 @@ First release of this fork. The engine underneath is still upstream's, but this 
 #### Added
 
 - Supports **one-click update from the page**: the system settings page gains a "Version & Updates" card, and the top bar shows a notice when a new version is available. The flow is: download the release package → verify `SHA256SUMS` → smoke test → stage → exit and get relaunched by the daemon script to complete the swap, with the page auto-refreshing.
-- Added the daemon startup scripts `start.sh` / `start.bat` as the official launch entry (already shipped in release packages and the Docker image; `install.sh` unchanged). They decide whether to relaunch based on the exit code and forward SIGTERM to artex. Verification and swap logic all live in Go; the scripts stay dumb-simple.
+- Added the daemon startup scripts `start.sh` / `start.bat` as the official launch entry (already shipped in release packages and the Docker image; `install.sh` unchanged). They decide whether to relaunch based on the exit code and forward SIGTERM to eyeofg0d. Verification and swap logic all live in Go; the scripts stay dumb-simple.
 - Automatic failure fallback: failed verification or smoke test discards the staged file and keeps running the current version; if the new version fails to start 3 times in a row it rolls back to the previous one. The settings page also has manual rollback (note the database schema is not rolled back).
 - Updates only trust GitHub domains and enforce HTTPS; the release source is not configurable; dev builds disable one-click update. GitHub query results are cached for 30 minutes so the top-bar notice does not exhaust the API quota.
 
 #### Known limitations
 
-- Under Docker only the program is swapped, not the image: toolchains are not upgraded along with it, and recreating the container reverts to the image-bundled version — use `docker compose pull artex` when needed.
+- Under Docker only the program is swapped, not the image: toolchains are not upgraded along with it, and recreating the container reverts to the image-bundled version — use `docker compose pull eyeofg0d` when needed.
 - The `skills/` from the release package are not synced; new built-in skills in the new version do not take effect automatically.
 - Updating means restarting, which interrupts running tasks.
 
@@ -911,7 +917,7 @@ First release of this fork. The engine underneath is still upstream's, but this 
 
 #### Added
 
-- Added `reset-password.sh` to reset the admin (username fixed as `ARTEX`) password: supports both local / docker deployments; connection info can be specified explicitly or read automatically from `--dsn`/`$ARTEX_PG_DSN`/`config.json`; uses `pgcrypto` in the database to generate a bcrypt hash compatible with backend login and writes it back to `settings.auth.password_hash`, no service restart needed after reset. The password is passed via an environment variable, never enters the process argv, and is escaped against injection.
+- Added `reset-password.sh` to reset the admin (username fixed as `EyeOfG0d`) password: supports both local / docker deployments; connection info can be specified explicitly or read automatically from `--dsn`/`$EYEOFG0D_PG_DSN`/`config.json`; uses `pgcrypto` in the database to generate a bcrypt hash compatible with backend login and writes it back to `settings.auth.password_hash`, no service restart needed after reset. The password is passed via an environment variable, never enters the process argv, and is escaped against injection.
 
 ### Contributors
 
@@ -1006,7 +1012,7 @@ First release of this fork. The engine underneath is still upstream's, but this 
 - The LLM configuration page is now a configuration card list with a right-side drawer editor, providing Pool polling order, priorities, exclusions, health states, and recovery operations.
 - Chain-exhaustion messages wrap on narrow screens; the current model changed from a session list icon to a text label next to the current session title with a full Tooltip.
 - The LLM resolution order for roles within a task is now "Agent binding → task configuration chain → global": roles with an explicitly bound model always run on that model, unbound roles fall to the task chain, and only when the task chain is empty do they fall to global.
-- An empty outbound proxy now means direct connection, no longer falling back to the `HTTP_PROXY`/`HTTPS_PROXY` environment variables (an explicit `ARTEX_LLM_PROXY` is unaffected); proxy input supports `socks5://user:pass@host:port` with credentials.
+- An empty outbound proxy now means direct connection, no longer falling back to the `HTTP_PROXY`/`HTTPS_PROXY` environment variables (an explicit `EYEOFG0D_LLM_PROXY` is unaffected); proxy input supports `socks5://user:pass@host:port` with credentials.
 
 #### Fixed
 
@@ -1157,17 +1163,17 @@ First release of this fork. The engine underneath is still upstream's, but this 
 - [@Autumn-27](https://github.com/Autumn-27)
 - [@neouks](https://github.com/neouks)
 
-[Unreleased]: https://github.com/BaaRai/ARTEX/compare/v0.6.0...HEAD
-[0.6.0]: https://github.com/BaaRai/ARTEX/compare/v0.5.1...v0.6.0
-[0.5.1]: https://github.com/BaaRai/ARTEX/compare/v0.5.0...v0.5.1
-[0.5.0]: https://github.com/BaaRai/ARTEX/compare/v0.4.0...v0.5.0
-[0.4.0]: https://github.com/BaaRai/ARTEX/compare/v0.3.15...v0.4.0
-[0.3.10]: https://github.com/Autumn-27/ARTEX/compare/v0.3.9...v0.3.10
-[0.3.9]: https://github.com/Autumn-27/ARTEX/compare/v0.3.8...v0.3.9
-[0.3.8]: https://github.com/Autumn-27/ARTEX/compare/v0.3.7...v0.3.8
-[0.3.7]: https://github.com/Autumn-27/ARTEX/compare/v0.3.6...v0.3.7
-[0.3.6]: https://github.com/Autumn-27/ARTEX/compare/v0.3.5...v0.3.6
-[0.3.5]: https://github.com/Autumn-27/ARTEX/compare/v0.3.4...v0.3.5
-[0.3.4]: https://github.com/Autumn-27/ARTEX/compare/v0.3.3...v0.3.4
-[0.3.3]: https://github.com/Autumn-27/ARTEX/compare/v0.3.2...v0.3.3
-[0.3.2]: https://github.com/Autumn-27/ARTEX/compare/v0.3.1...v0.3.2
+[Unreleased]: https://github.com/zakirkun/EyeOfG0d/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/zakirkun/EyeOfG0d/compare/v0.5.1...v0.6.0
+[0.5.1]: https://github.com/zakirkun/EyeOfG0d/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/zakirkun/EyeOfG0d/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/zakirkun/EyeOfG0d/compare/v0.3.15...v0.4.0
+[0.3.10]: https://github.com/zakirkun/EyeOfG0d/compare/v0.3.9...v0.3.10
+[0.3.9]: https://github.com/zakirkun/EyeOfG0d/compare/v0.3.8...v0.3.9
+[0.3.8]: https://github.com/zakirkun/EyeOfG0d/compare/v0.3.7...v0.3.8
+[0.3.7]: https://github.com/zakirkun/EyeOfG0d/compare/v0.3.6...v0.3.7
+[0.3.6]: https://github.com/zakirkun/EyeOfG0d/compare/v0.3.5...v0.3.6
+[0.3.5]: https://github.com/zakirkun/EyeOfG0d/compare/v0.3.4...v0.3.5
+[0.3.4]: https://github.com/zakirkun/EyeOfG0d/compare/v0.3.3...v0.3.4
+[0.3.3]: https://github.com/zakirkun/EyeOfG0d/compare/v0.3.2...v0.3.3
+[0.3.2]: https://github.com/zakirkun/EyeOfG0d/compare/v0.3.1...v0.3.2

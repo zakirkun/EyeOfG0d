@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
 # =============================================================================
-# ARTEX admin password reset script
+# EyeOfG0d admin password reset script
 #
-# The login username is fixed as ARTEX; the password is stored as a bcrypt hash in
+# The login username is fixed as EyeOfG0d; the password is stored as a bcrypt hash in
 # the auth.password_hash key of the settings table. The same transaction increments
 # auth.password_version. This script uses pgcrypto to generate the bcrypt hash
 # in-database, compatible with the backend (x/crypto/bcrypt). The running process
-# reads that version only at startup, so ARTEX must be restarted after a reset.
+# reads that version only at startup, so EyeOfG0d must be restarted after a reset.
 #
 # Two deployments:
 #   local (default) — host connects to the database directly with psql. Connection
-#                    info priority: args > --dsn/$ARTEX_PG_DSN > config.json database.*
+#                    info priority: args > --dsn/$EYEOFG0D_PG_DSN > config.json database.*
 #   docker          — runs psql inside the postgres container via `docker compose
 #                    exec` (or `docker exec`) (compose does not expose 5432 by default).
 #
 # Usage examples:
 #   ./reset-password.sh                          # local, auto-reads config.json/env, prompts for the new password
 #   ./reset-password.sh -p 'New-Passphrase!'     # local, new password given directly (at least 12 characters)
-#   ./reset-password.sh --dsn postgres://u:p@h:5432/artex
-#   ./reset-password.sh -H 127.0.0.1 -P 5433 -U autopentest -W pass -d artex
+#   ./reset-password.sh --dsn postgres://u:p@h:5432/eyeofg0d
+#   ./reset-password.sh -H 127.0.0.1 -P 5433 -U autopentest -W pass -d eyeofg0d
 #   ./reset-password.sh -m docker                # docker deployment (reads POSTGRES_* from .env)
 #   ./reset-password.sh -m docker -c pg-container-name --exec docker
 #
@@ -115,7 +115,7 @@ apply_config_fields() {
 
 # ---- Auto-detect mode ---------------------------------------------------------
 if [[ -z "$MODE" ]]; then
-  if [[ -n "$DSN$HOST$USER$DBNAME" || -n "${ARTEX_PG_DSN:-}" || -f "${CONFIG:-config.json}" ]]; then
+  if [[ -n "$DSN$HOST$USER$DBNAME" || -n "${EYEOFG0D_PG_DSN:-}" || -f "${CONFIG:-config.json}" ]]; then
     MODE="local"
   elif command -v docker >/dev/null 2>&1 && [[ -f docker-compose.yml ]]; then
     MODE="docker"
@@ -127,7 +127,7 @@ info "deployment mode: $MODE"
 
 # ---- Collect the new password -------------------------------------------------
 if [[ -z "$NEWPASS" ]]; then
-  read -r -s -p "Enter new password (username is fixed as ARTEX): " NEWPASS; echo >&2
+  read -r -s -p "Enter new password (username is fixed as EyeOfG0d): " NEWPASS; echo >&2
   [[ -n "$NEWPASS" ]] || die "password cannot be empty"
   read -r -s -p "Enter again to confirm: " NEWPASS2; echo >&2
   [[ "$NEWPASS" == "$NEWPASS2" ]] || die "the two entries do not match"
@@ -139,7 +139,7 @@ NEWPASS_CHARS=$(printf '%s' "$NEWPASS" | LC_ALL=C tr -d '\200-\277' | wc -c)
 (( NEWPASS_CHARS >= 12 )) || die "password must be at least 12 characters"
 
 # Hand the password to psql via environment variable (read with \getenv, never in argv/ps)
-export ARTEX_RESET_NEWPASS="$NEWPASS"
+export EYEOFG0D_RESET_NEWPASS="$NEWPASS"
 
 # Generate bcrypt in-database and upsert the hash and the password version in one
 # transaction. The password is auto-escaped with :'newpw'. CREATE EXTENSION is
@@ -147,7 +147,7 @@ export ARTEX_RESET_NEWPASS="$NEWPASS"
 # here (see the hint in the run failure branch below).
 SQL=$(cat <<SQL
 \\set ON_ERROR_STOP on
-\\getenv newpw ARTEX_RESET_NEWPASS
+\\getenv newpw EYEOFG0D_RESET_NEWPASS
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 BEGIN;
 INSERT INTO settings(key, value)
@@ -163,9 +163,9 @@ SQL
 
 # ---- Execute ------------------------------------------------------------------
 if [[ "$MODE" == "local" ]]; then
-  # Connection info priority: command line > --dsn/$ARTEX_PG_DSN > config.json
+  # Connection info priority: command line > --dsn/$EYEOFG0D_PG_DSN > config.json
   if [[ -z "$DSN" && -z "$HOST$USER$DBNAME" ]]; then
-    [[ -n "${ARTEX_PG_DSN:-}" ]] && DSN="$ARTEX_PG_DSN"
+    [[ -n "${EYEOFG0D_PG_DSN:-}" ]] && DSN="$EYEOFG0D_PG_DSN"
   fi
   if [[ -z "$DSN" && -z "$HOST$USER$DBNAME" ]]; then
     cfg="${CONFIG:-config.json}"
@@ -193,7 +193,7 @@ if [[ "$MODE" == "local" ]]; then
 
   info "target database: $target"
   if [[ "$ASSUME_YES" -ne 1 ]]; then
-    read -r -p "Reset the ARTEX password in this database? [y/N] " ans
+    read -r -p "Reset the EyeOfG0d password in this database? [y/N] " ans
     [[ "$ans" == "y" || "$ans" == "Y" ]] || die "cancelled"
   fi
 
@@ -215,29 +215,29 @@ else
     fi
   fi
 
-  # psql credentials inside the container: command line first, then POSTGRES_* from .env, then compose defaults (artex)
+  # psql credentials inside the container: command line first, then POSTGRES_* from .env, then compose defaults (eyeofg0d)
   if [[ -f .env ]]; then
     # shellcheck disable=SC1091
     set -a; . ./.env; set +a
   fi
-  DUSER="${USER:-${POSTGRES_USER:-artex}}"
-  DNAME="${DBNAME:-${POSTGRES_DB:-artex}}"
+  DUSER="${USER:-${POSTGRES_USER:-eyeofg0d}}"
+  DNAME="${DBNAME:-${POSTGRES_DB:-eyeofg0d}}"
   [[ -n "$DBPASS" ]] && export PGPASSWORD="$DBPASS"
   [[ -z "${PGPASSWORD:-}" && -n "${POSTGRES_PASSWORD:-}" ]] && export PGPASSWORD="$POSTGRES_PASSWORD"
 
   info "target: psql -U $DUSER -d $DNAME inside container $CONTAINER (exec=$EXEC_KIND)"
   if [[ "$ASSUME_YES" -ne 1 ]]; then
-    read -r -p "Reset the ARTEX password in this container database? [y/N] " ans
+    read -r -p "Reset the EyeOfG0d password in this container database? [y/N] " ans
     [[ "$ans" == "y" || "$ans" == "Y" ]] || die "cancelled"
   fi
 
   # -e with a name only (no value) → inherited from the current environment, so the password never appears in the docker command argv.
   declare -a EXEC_CMD
   if [[ "$EXEC_KIND" == "compose" ]]; then
-    EXEC_CMD=(docker compose exec -T -e ARTEX_RESET_NEWPASS -e PGPASSWORD "$CONTAINER"
+    EXEC_CMD=(docker compose exec -T -e EYEOFG0D_RESET_NEWPASS -e PGPASSWORD "$CONTAINER"
               psql -U "$DUSER" -d "$DNAME" -v ON_ERROR_STOP=1 -q)
   else
-    EXEC_CMD=(docker exec -i -e ARTEX_RESET_NEWPASS -e PGPASSWORD "$CONTAINER"
+    EXEC_CMD=(docker exec -i -e EYEOFG0D_RESET_NEWPASS -e PGPASSWORD "$CONTAINER"
               psql -U "$DUSER" -d "$DNAME" -v ON_ERROR_STOP=1 -q)
   fi
 
@@ -246,5 +246,5 @@ else
   fi
 fi
 
-unset ARTEX_RESET_NEWPASS
-echo "✓ ARTEX admin password has been reset. Restart ARTEX, then log in with username ARTEX and the new password. Sessions from before the restart stop working."
+unset EYEOFG0D_RESET_NEWPASS
+echo "✓ EyeOfG0d admin password has been reset. Restart EyeOfG0d, then log in with username EyeOfG0d and the new password. Sessions from before the restart stop working."

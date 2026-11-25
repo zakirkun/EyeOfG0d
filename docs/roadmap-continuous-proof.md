@@ -24,7 +24,7 @@ Four research streams fed this; the decision-relevant findings:
 on fully autonomous pentesting fell from 29% to 9% year over year; 78% saw automated tools miss critical
 vulnerabilities. Commercial leaders (XBOW, NodeZero, Pentera) do differentiate on validated exploit paths
 and retest loops, but their "proof" is largely vendor-internal. No one exposes a **portable, replayable
-evidence artifact** as a first-class output. That is precisely where ARTEX's architecture already sits.
+evidence artifact** as a first-class output. That is precisely where EyeOfG0d's architecture already sits.
 
 **The autonomy leaders are cloud-bound and opaque.** XBOW and NodeZero show no documented self-host or
 air-gapped path. The OSS agent wave (PentestGPT, Strix, Hexstrike) is flexible but evidence is
@@ -83,8 +83,8 @@ cannot be verified in this repo today. It makes the product better and the proje
 space right now. I am deliberately separating it: it is a research track to run *after* this feature, not
 a substitute for it, because it is orthogonal to every axis you selected.
 
-**On RBAC** — the codebase analysis is blunt and I agree with it: `ARTEX` is a hardcoded username
-(`server/auth.go:585`), the JWT subject is the constant `"ARTEX"` (`server/auth.go:190`), and no role or
+**On RBAC** — the codebase analysis is blunt and I agree with it: `EyeOfG0d` is a hardcoded username
+(`server/auth.go:585`), the JWT subject is the constant `"EyeOfG0d"` (`server/auth.go:190`), and no role or
 tenant column exists anywhere in the schema. Threading a principal through `requireAuth` touches
 essentially every handler and contradicts the deliberate client-side-auth model
 (`server/webui_embed.go:21`). It is the biggest genuine gap versus commercial products and the wrong

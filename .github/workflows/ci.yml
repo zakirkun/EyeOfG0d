@@ -12,18 +12,18 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: artex
+          POSTGRES_USER: eyeofg0d
           POSTGRES_PASSWORD: testpass
-          POSTGRES_DB: artextest
+          POSTGRES_DB: eyeofg0dtest
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U artex"
+          --health-cmd "pg_isready -U eyeofg0d"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
     env:
-      ARTEX_PG_DSN: postgres://artex:testpass@localhost:5432/artextest?sslmode=disable
+      EYEOFG0D_PG_DSN: postgres://eyeofg0d:testpass@localhost:5432/eyeofg0dtest?sslmode=disable
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -37,7 +37,7 @@ jobs:
       - run: go vet ./...
       # Skipped tests, tracked in issue #9:
       # - TestGraphOverviewExpandsAssociatedCompanyScope,
-      #   TestCaptureApprovalLifecycle: fail on unmodified upstream code with a
+      #   TestCaptureApprovalLifecycle: fail on a clean checkout with a
       #   fresh database.
       # - TestSideUsageRecordedOnceOnConsumerCancellation: concurrency/cancellation
       #   test that passes locally but is timing-sensitive on 2-core CI runners.
@@ -50,13 +50,13 @@ jobs:
         run: go test -p 1 ./...
       - name: online index scripts
         # Apply and roll back scripts/sql on a database built here from
-        # db/schema.sql and db/migrations. The job-level artextest database
+        # db/schema.sql and db/migrations. The job-level eyeofg0dtest database
         # never gets the schema (packages use suffixed databases), and cached
         # test results mean no test database is guaranteed to exist.
         env:
-          SQL_DSN: postgres://artex:testpass@localhost:5432/artextest_sqlscripts?sslmode=disable
+          SQL_DSN: postgres://eyeofg0d:testpass@localhost:5432/eyeofg0dtest_sqlscripts?sslmode=disable
         run: |
-          psql "$ARTEX_PG_DSN" -X -v ON_ERROR_STOP=1 -c 'CREATE DATABASE artextest_sqlscripts'
+          psql "$EYEOFG0D_PG_DSN" -X -v ON_ERROR_STOP=1 -c 'CREATE DATABASE eyeofg0dtest_sqlscripts'
           psql "$SQL_DSN" -X -q -v ON_ERROR_STOP=1 -f db/schema.sql
           for f in db/migrations/*.sql; do psql "$SQL_DSN" -X -q -v ON_ERROR_STOP=1 -f "$f"; done
           psql "$SQL_DSN" -X -v ON_ERROR_STOP=1 -f scripts/sql/20261115-task-query-indexes.sql
@@ -68,10 +68,10 @@ jobs:
         # Its own database: the plain run above leaves rows behind and the db tests
         # are not idempotent across runs (duplicate llm_profiles names).
         env:
-          ARTEX_PG_DSN: postgres://artex:testpass@localhost:5432/artextest_race?sslmode=disable
+          EYEOFG0D_PG_DSN: postgres://eyeofg0d:testpass@localhost:5432/eyeofg0dtest_race?sslmode=disable
 
         run: >-
-          go test -race -p 1 ./agent ./cmd/artex ./config ./db ./evidence ./guard
+          go test -race -p 1 ./agent ./cmd/eyeofg0d ./config ./db ./evidence ./guard
           ./intercept ./llmpool ./llmrec ./mcphttp ./notify ./server ./sidequestion
           ./traffic ./traffic/rewrite
 
@@ -93,18 +93,18 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: artex
+          POSTGRES_USER: eyeofg0d
           POSTGRES_PASSWORD: testpass
-          POSTGRES_DB: artextest
+          POSTGRES_DB: eyeofg0dtest
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U artex"
+          --health-cmd "pg_isready -U eyeofg0d"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
     env:
-      ARTEX_PG_DSN: postgres://artex:testpass@localhost:5432/artextest?sslmode=disable
+      EYEOFG0D_PG_DSN: postgres://eyeofg0d:testpass@localhost:5432/eyeofg0dtest?sslmode=disable
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

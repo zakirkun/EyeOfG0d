@@ -1,6 +1,7 @@
 ---
 name: mobile-apk
 description: "Invoke this skill when the task targets an Android application (APK/AAB) rather than a website: static analysis of the manifest, signing certificate, exported components, deep links and embedded credentials, plus the dynamic follow-up that proves an exported component reachable. Covers OWASP MASVS and the Mobile Top 10."
+mcps: ScopeSentry, browser
 ---
 
 # Android APK Pentest Flow
@@ -37,7 +38,7 @@ Do not decompile the whole package "to understand it". It costs time and the int
 
 ## Stage 3: dynamic proof (only with a ready emulator)
 
-Everything above is what the app declares. Proving it needs the target installed on a device you control, plus a hostile intent. ARTEX provides this through its optional emulator profile, surfaced as tools — do not shell out to `adb` yourself:
+Everything above is what the app declares. Proving it needs the target installed on a device you control, plus a hostile intent. EyeOfG0d provides this through its optional emulator profile, surfaced as tools — do not shell out to `adb` yourself:
 
 1. `install_target_apk` with the workspace path of the APK. It uploads and installs the package; the bytes never leave the task's own emulator.
 2. `list_emulator_packages` to confirm the package is present before you rely on it.

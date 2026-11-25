@@ -1,6 +1,7 @@
 ---
 name: tech-playbook
 description: "Infrastructure and platform targets: cloud (AWS, Firebase, Supabase), containers and Kubernetes, CI/CD and source control, datastores (Redis, MongoDB, Elasticsearch, Memcached), web servers, observability stacks, mobile, and IoT firmware. Index of 25 references."
+mcps: ScopeSentry, browser
 ---
 
 # Technology playbook (index)

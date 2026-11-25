@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/intercept"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/intercept"
 )
 
 // fakeGate scripts the target gate. check and request receive the number of
@@ -106,7 +106,7 @@ func TestTargetGateRunsOutsideEnabledToolSet(t *testing.T) {
 		}
 		for _, c := range calls {
 			block, msg := pre(g, ctx, c.tool, c.input)
-			if !block || !strings.HasPrefix(msg, "[ARTEX platform control, not target defense] TARGET_RULE_BLOCKED: 203.0.113.7 is blocked by an asset rule.") {
+			if !block || !strings.HasPrefix(msg, "[EyeOfG0d platform control, not target defense] TARGET_RULE_BLOCKED: 203.0.113.7 is blocked by an asset rule.") {
 				t.Errorf("%s: %s block=%v msg=%q", name, c.tool, block, msg)
 			}
 		}
@@ -258,7 +258,7 @@ func TestTargetBlockMessage(t *testing.T) {
 	}
 	for _, c := range cases {
 		msg := TargetBlockMessage(c.res)
-		if !strings.HasPrefix(msg, "[ARTEX platform control, not target defense] "+c.res.Code+": ") {
+		if !strings.HasPrefix(msg, "[EyeOfG0d platform control, not target defense] "+c.res.Code+": ") {
 			t.Errorf("%s: message = %q", c.res.Code, msg)
 		}
 		for _, want := range c.want {
@@ -482,7 +482,7 @@ func (g *gateDB) onePending(ch <-chan hookResult) approvalRow {
 
 func (g *gateDB) decide(id int64, allowed bool) {
 	g.t.Helper()
-	if err := g.ic.Decide(id, allowed, "ARTEX", "192.0.2.1"); err != nil {
+	if err := g.ic.Decide(id, allowed, "EyeOfG0d", "192.0.2.1"); err != nil {
 		g.t.Fatal(err)
 	}
 }
@@ -909,7 +909,7 @@ func TestTargetGateThroughHook(t *testing.T) {
 	row = g.onePending(ch)
 	g.decide(row.id, false)
 	r := g.result(ch)
-	if !r.block || !strings.HasPrefix(r.msg, "[ARTEX platform control, not target defense] TARGET_DENIED: target app.example.com:443: ") {
+	if !r.block || !strings.HasPrefix(r.msg, "[EyeOfG0d platform control, not target defense] TARGET_DENIED: target app.example.com:443: ") {
 		t.Fatalf("denied: %+v", r)
 	}
 	if pins := g.pins(); len(pins) != 1 || pins[0].Version != 1 {

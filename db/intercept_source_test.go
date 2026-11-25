@@ -3,8 +3,8 @@ package db_test
 import (
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/intercept"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/intercept"
 )
 
 // The judge writer (package intercept) and the decision_source readers (package

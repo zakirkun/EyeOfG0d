@@ -524,7 +524,7 @@ func (h *HeaderValues) UnmarshalJSON(b []byte) error {
 
 // Skills maps a discovery keyword to an upstream skill path.
 //
-// Embedded for provenance and completeness only: artex discovers skills through
+// Embedded for provenance and completeness only: eyeofg0d discovers skills through
 // SKILL.md frontmatter plus builtinSkillVisibility, and this table must never
 // become a second discovery path.
 type Skills struct {

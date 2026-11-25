@@ -1,6 +1,7 @@
 ---
 name: tool-playbook
 description: "Driving a specific security tool correctly: nmap, nuclei, sqlmap, dalfox, fuzzing strategy, hashcat/john, Impacket, Metasploit, semgrep, source review. Index of 18 references, each annotated with whether this image can actually run it."
+mcps: ScopeSentry, browser
 ---
 
 # Tool playbook (index)

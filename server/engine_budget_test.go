@@ -6,16 +6,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Autumn-27/artex/agent"
-	pgdb "github.com/Autumn-27/artex/db"
 	"github.com/Autumn-27/norma/llm"
+	"github.com/zakirkun/EyeOfG0d/agent"
+	pgdb "github.com/zakirkun/EyeOfG0d/db"
 )
 
 // With the budget env vars unset the engine decides exactly as before (no round
 // stopped, no claim blocked, contexts untouched, every tool call let through);
 // a task budget flips the same decisions once the task cannot afford a worker.
 func TestEngineBudgetPassthroughAndGate(t *testing.T) {
-	for _, k := range []string{"ARTEX_TASK_BUDGET_TOKENS", "ARTEX_TASK_BUDGET_TURNS", "ARTEX_INTENT_BUDGET_TOKENS", "ARTEX_INTENT_BUDGET_TURNS"} {
+	for _, k := range []string{"EYEOFG0D_TASK_BUDGET_TOKENS", "EYEOFG0D_TASK_BUDGET_TURNS", "EYEOFG0D_INTENT_BUDGET_TOKENS", "EYEOFG0D_INTENT_BUDGET_TURNS"} {
 		t.Setenv(k, "")
 	}
 	ctx, task := context.Background(), &Task{ID: "7"}
@@ -29,7 +29,7 @@ func TestEngineBudgetPassthroughAndGate(t *testing.T) {
 		t.Fatal("no budget: a tool call was refused")
 	}
 
-	t.Setenv("ARTEX_TASK_BUDGET_TOKENS", "100000")
+	t.Setenv("EYEOFG0D_TASK_BUDGET_TOKENS", "100000")
 	e = NewEngine(nil)
 	_, meter = e.budgetIntent(ctx, task.ID)
 	meter.Record(llm.Usage{InputTokens: 60_000}) // remaining 40k < default worker estimate 50k
@@ -49,10 +49,10 @@ func TestEngineBudgetPassthroughAndGate(t *testing.T) {
 // A finished run that settled with the budget wrap-up must not gate its revive:
 // after resetSettledRun the task plans and claims again, with a fresh ledger.
 func TestResetSettledRunRestartsBudget(t *testing.T) {
-	t.Setenv("ARTEX_TASK_BUDGET_TOKENS", "100000")
-	t.Setenv("ARTEX_TASK_BUDGET_TURNS", "")
-	t.Setenv("ARTEX_INTENT_BUDGET_TOKENS", "")
-	t.Setenv("ARTEX_INTENT_BUDGET_TURNS", "")
+	t.Setenv("EYEOFG0D_TASK_BUDGET_TOKENS", "100000")
+	t.Setenv("EYEOFG0D_TASK_BUDGET_TURNS", "")
+	t.Setenv("EYEOFG0D_INTENT_BUDGET_TOKENS", "")
+	t.Setenv("EYEOFG0D_INTENT_BUDGET_TURNS", "")
 	ctx, task := context.Background(), &Task{ID: "9"}
 	e := NewEngine(nil)
 	e.settling.Store(task.ID, true)
@@ -76,10 +76,10 @@ func TestResetSettledRunRestartsBudget(t *testing.T) {
 // back. A restore that lands on the wrap-up reserve leaves only that reserve,
 // and the worker estimate starts from the defaults.
 func TestResetSettledRunReseedsBudgetFromUsage(t *testing.T) {
-	for _, k := range []string{"ARTEX_TASK_BUDGET_TURNS", "ARTEX_INTENT_BUDGET_TOKENS", "ARTEX_INTENT_BUDGET_TURNS"} {
+	for _, k := range []string{"EYEOFG0D_TASK_BUDGET_TURNS", "EYEOFG0D_INTENT_BUDGET_TOKENS", "EYEOFG0D_INTENT_BUDGET_TURNS"} {
 		t.Setenv(k, "")
 	}
-	t.Setenv("ARTEX_TASK_BUDGET_TOKENS", "100000")
+	t.Setenv("EYEOFG0D_TASK_BUDGET_TOKENS", "100000")
 	m, err := NewManager(t.TempDir(), "")
 	if err != nil {
 		t.Skipf("postgres unavailable (%v)", err)

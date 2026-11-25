@@ -6,12 +6,12 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/Autumn-27/artex/egress"
-	"github.com/Autumn-27/artex/intercept"
 	actool "github.com/Autumn-27/norma/tool"
+	"github.com/zakirkun/EyeOfG0d/egress"
+	"github.com/zakirkun/EyeOfG0d/intercept"
 )
 
-// pinNoiseOff runs t with the off noise profile, whatever ARTEX_NOISE_PROFILE says.
+// pinNoiseOff runs t with the off noise profile, whatever EYEOFG0D_NOISE_PROFILE says.
 func pinNoiseOff(t *testing.T) {
 	old := egressGovernor
 	egressGovernor = func() *egress.Governor { return egress.New(egress.Profile{Name: "off"}) }

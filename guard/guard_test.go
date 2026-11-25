@@ -8,9 +8,9 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/Autumn-27/artex/db"
-	"github.com/Autumn-27/artex/intercept"
 	"github.com/Autumn-27/norma/hook"
+	"github.com/zakirkun/EyeOfG0d/db"
+	"github.com/zakirkun/EyeOfG0d/intercept"
 )
 
 // A guard with no interceptor no longer hard-blocks anything: destructive/exfil
@@ -113,7 +113,7 @@ func TestTargetOnlyGuardAppliesBuiltinDenyRules(t *testing.T) {
 		})
 		return ic
 	}
-	const platform = "[ARTEX platform control, not target defense]"
+	const platform = "[EyeOfG0d platform control, not target defense]"
 
 	g := NewTargetOnly(newIC())
 	gate := &fakeGate{t: t}
@@ -169,7 +169,7 @@ func TestDenyRuleReasonIsCapped(t *testing.T) {
 		t.Fatalf("message has %d runes, want at most %d", n, limit)
 	}
 	if !utf8.ValidString(msg) ||
-		!strings.HasPrefix(msg, "[ARTEX platform control, not target defense] This call was intercepted by the platform. Reason: ") ||
+		!strings.HasPrefix(msg, "[EyeOfG0d platform control, not target defense] This call was intercepted by the platform. Reason: ") ||
 		!strings.HasSuffix(msg, strings.Repeat("日", maxBlockReasonRunes)+" …(truncated). This operation is forbidden.") {
 		t.Errorf("capped message lost its framing or guidance: %q...%q", msg[:120], msg[len(msg)-120:])
 	}
@@ -188,7 +188,7 @@ func TestTargetBlockReasonIsCapped(t *testing.T) {
 		t.Fatalf("message has %d runes, want at most %d", n, limit)
 	}
 	if !utf8.ValidString(msg) ||
-		!strings.HasPrefix(msg, "[ARTEX platform control, not target defense] TARGET_DENIED: target app.example.com:443: ") ||
+		!strings.HasPrefix(msg, "[EyeOfG0d platform control, not target defense] TARGET_DENIED: target app.example.com:443: ") ||
 		!strings.HasSuffix(msg, strings.Repeat("é", maxBlockReasonRunes)+" …(truncated). "+targetGuidance[intercept.TargetDenied]) {
 		t.Errorf("capped message lost its target or guidance: %q...%q", msg[:120], msg[len(msg)-120:])
 	}
@@ -202,12 +202,12 @@ func TestShortBlockReasonUnchanged(t *testing.T) {
 		}
 	}
 	if got, want := systemBlockMessage("Destructive command rejected"),
-		"[ARTEX platform control, not target defense] This call was intercepted by the platform. Reason: Destructive command rejected. This operation is forbidden."; got != want {
+		"[EyeOfG0d platform control, not target defense] This call was intercepted by the platform. Reason: Destructive command rejected. This operation is forbidden."; got != want {
 		t.Errorf("systemBlockMessage = %q, want %q", got, want)
 	}
 	res := intercept.TargetResult{Code: intercept.TargetDenied, Host: "app.example.com", Port: 443, Reason: "the request was denied"}
 	if got, want := TargetBlockMessage(res),
-		"[ARTEX platform control, not target defense] TARGET_DENIED: target app.example.com:443: the request was denied. "+targetGuidance[intercept.TargetDenied]; got != want {
+		"[EyeOfG0d platform control, not target defense] TARGET_DENIED: target app.example.com:443: the request was denied. "+targetGuidance[intercept.TargetDenied]; got != want {
 		t.Errorf("TargetBlockMessage = %q, want %q", got, want)
 	}
 }

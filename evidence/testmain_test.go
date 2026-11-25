@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Autumn-27/artex/db"
+	"github.com/zakirkun/EyeOfG0d/db"
 )
 
 // Initialize an explicitly configured fresh database before taking the same
@@ -14,13 +14,13 @@ func TestMain(m *testing.M) {
 	// Own database per package (#80): stop contending on the shared tables of
 	// a single test database during parallel ./... runs.
 	db.SuffixTestDatabase("evidence")
-	if os.Getenv("ARTEX_PG_DSN") == "" {
+	if os.Getenv("EYEOFG0D_PG_DSN") == "" {
 		os.Exit(m.Run())
 	}
 	os.Exit(runEvidenceSuite(m))
 }
 func runEvidenceSuite(m *testing.M) int {
-	pg, err := db.Open(os.Getenv("ARTEX_PG_DSN"))
+	pg, err := db.Open(os.Getenv("EYEOFG0D_PG_DSN"))
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,7 @@ func runEvidenceSuite(m *testing.M) int {
 	}
 	defer conn.ExecContext(context.Background(), `SELECT pg_advisory_unlock(7337741002)`)
 	// Snapshot inserts seal the heads: load a fixed test key (env, no key file).
-	os.Setenv("ARTEX_SECRET_KEY", "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")
+	os.Setenv("EYEOFG0D_SECRET_KEY", "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")
 	if err = pg.InitSecrets(""); err != nil {
 		panic(err)
 	}

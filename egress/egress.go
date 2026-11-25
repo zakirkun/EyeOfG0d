@@ -1,6 +1,6 @@
 // Package egress is the governor the platform-owned HTTP requests to a target
 // pass through (WebFetch, the http custom tools, the enrich probe). A noise
-// profile (the noise_profile setting, else ARTEX_NOISE_PROFILE; SetProfile
+// profile (the noise_profile setting, else EYEOFG0D_NOISE_PROFILE; SetProfile
 // changes it at runtime) sets every lever: a token bucket, a jitter and a
 // concurrency cap per host, a global concurrency cap, backoff on 429/503, and,
 // for the GET requests of one task, coalescing and a short cache. The default
@@ -27,7 +27,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/Autumn-27/artex/intercept"
+	"github.com/zakirkun/EyeOfG0d/intercept"
 )
 
 // Profile is one noise level. The zero Profile is off. Later levers (scanner
@@ -43,13 +43,13 @@ type Profile struct {
 	MaxRetries int           // retries after a 429/503 (bodiless GET/HEAD/OPTIONS only)
 	BaseDelay  time.Duration // backoff without Retry-After, doubled per retry
 	MaxDelay   time.Duration // cap of one backoff; a longer Retry-After is not retried
-	UserAgent  string        // ARTEX_TARGET_USER_AGENT, set on requests that have none; "" = unchanged
+	UserAgent  string        // EYEOFG0D_TARGET_USER_AGENT, set on requests that have none; "" = unchanged
 }
 
 // MaxJitter caps the jitter of one send.
 const MaxJitter = 250 * time.Millisecond
 
-// Profiles are the values of ARTEX_NOISE_PROFILE besides off (the default).
+// Profiles are the values of EYEOFG0D_NOISE_PROFILE besides off (the default).
 var Profiles = map[string]Profile{
 	"quiet":      {Name: "quiet", RPS: 2, Burst: 4, MaxPerHost: 1, MaxGlobal: 8, Jitter: 0.5, CacheTTL: time.Minute, MaxRetries: 3, BaseDelay: 2 * time.Second, MaxDelay: time.Minute},
 	"balanced":   {Name: "balanced", RPS: 5, Burst: 10, MaxPerHost: 2, MaxGlobal: 16, Jitter: 0.2, CacheTTL: 30 * time.Second, MaxRetries: 3, BaseDelay: time.Second, MaxDelay: 30 * time.Second},
@@ -58,7 +58,7 @@ var Profiles = map[string]Profile{
 
 // ProfileByName returns the profile name names (off, quiet, balanced or
 // aggressive, any case); ok is false for any other name, "" included. A profile
-// other than off carries ARTEX_TARGET_USER_AGENT; off stays a strict passthrough.
+// other than off carries EYEOFG0D_TARGET_USER_AGENT; off stays a strict passthrough.
 func ProfileByName(name string) (p Profile, ok bool) {
 	name = strings.ToLower(strings.TrimSpace(name))
 	if name == "off" {
@@ -67,21 +67,21 @@ func ProfileByName(name string) (p Profile, ok bool) {
 	if p, ok = Profiles[name]; !ok {
 		return Profile{Name: "off"}, false
 	}
-	if ua := strings.TrimSpace(os.Getenv("ARTEX_TARGET_USER_AGENT")); strings.ContainsFunc(ua, unicode.IsControl) {
-		log.Printf("[egress] ARTEX_TARGET_USER_AGENT contains a control character; ignored")
+	if ua := strings.TrimSpace(os.Getenv("EYEOFG0D_TARGET_USER_AGENT")); strings.ContainsFunc(ua, unicode.IsControl) {
+		log.Printf("[egress] EYEOFG0D_TARGET_USER_AGENT contains a control character; ignored")
 	} else {
 		p.UserAgent = ua
 	}
 	return p, true
 }
 
-// ProfileFromEnv returns the profile ARTEX_NOISE_PROFILE names; unset, "off" or
+// ProfileFromEnv returns the profile EYEOFG0D_NOISE_PROFILE names; unset, "off" or
 // unknown is off.
 func ProfileFromEnv() Profile {
-	name := strings.TrimSpace(os.Getenv("ARTEX_NOISE_PROFILE"))
+	name := strings.TrimSpace(os.Getenv("EYEOFG0D_NOISE_PROFILE"))
 	p, ok := ProfileByName(name)
 	if !ok && name != "" {
-		log.Printf("[egress] ARTEX_NOISE_PROFILE=%q is not off, quiet, balanced or aggressive; using off", name)
+		log.Printf("[egress] EYEOFG0D_NOISE_PROFILE=%q is not off, quiet, balanced or aggressive; using off", name)
 	}
 	return p
 }

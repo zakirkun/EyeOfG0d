@@ -59,7 +59,7 @@
 - **Tester-centric interactive toolkit with AI augmentation** (human-speed depth vs platform autonomy). [vendor-claim] Caido.
 
 ---
-## Genuine Whitespace for ARTEX (self-hosted, LLM-driven, evidence-first)
+## Genuine Whitespace for EyeOfG0d (self-hosted, LLM-driven, evidence-first)
 
 - **Evidence-first by default:** cryptographically/structurally traceable artifacts per finding (raw requests/responses, command transcripts, timestamps, environment hashes, replay steps) with explicit proof levels (observed / reproducible / exploit-confirmed). Many platforms claim validation but expose limited portable evidence schemas. [synthesis]
 - **Self-hosted + air-gapped parity:** full autonomous/agentic capability without SaaS dependency (localizable model/planner/tooling), addressing regulated/on-prem needs where commercial SaaS dominates. [synthesis]
@@ -83,24 +83,24 @@ Gap: independent practitioner review aggregation (HN, r/netsec, G2, Gartner Peer
 
 - [unverified/gap] An XBOW open-source release was explicitly requested but **not confirmed** from fetched sources (https://xbow.com/, https://xbow.com/platform). Any claim of an XBOW OSS release, license, or repository remains unverified until corroborated with a primary URL/repository.
 
-## Whitespace for ARTEX (self-hosted, LLM-driven, evidence-first)
+## Whitespace for EyeOfG0d (self-hosted, LLM-driven, evidence-first)
 
 
 1. **Evidence-first, replayable artifact model as a product primitive**
    - Gap: many tools claim validated findings but expose heterogeneous evidence (screenshots/text, opaque traces, scanner logs) not optimized for offline audit, legal defensibility, or deterministic re-verification.
-   - ARTEX opportunity: canonical evidence bundles (traffic captures, request/response transcripts, exploit steps, environment fingerprints, graph state, timestamps, hashes), signed/exportable for air-gapped review and regression retest.
+   - EyeOfG0d opportunity: canonical evidence bundles (traffic captures, request/response transcripts, exploit steps, environment fingerprints, graph state, timestamps, hashes), signed/exportable for air-gapped review and regression retest.
 
 2. **First-class asset and exploration graph tied to a recording MITM proxy**
    - Gap: proxies (Burp/Caido/ZAP) capture traffic but are not natively coupled to autonomous planner/worker exploration state; autonomous platforms rarely expose graph-native, user-inspectable exploration provenance.
-   - ARTEX opportunity: unify MITM recordings, discovered assets/endpoints/auth states, and agent decisions into a queryable graph (what was tried, why, evidence produced, coverage gaps).
+   - EyeOfG0d opportunity: unify MITM recordings, discovered assets/endpoints/auth states, and agent decisions into a queryable graph (what was tried, why, evidence produced, coverage gaps).
 
 3. **Truly self-hosted / air-gapped autonomous operation with BYO models**
    - Gap: leading commercial autonomous platforms are SaaS/cloud-orchestrated (XBOW, NodeZero control-plane dependency, Intruder SaaS); OSS agents allow local runs but lack enterprise-grade evidence/reporting/governance.
-   - ARTEX opportunity: turnkey on-prem deployment, offline model options/BYOK routing, strict data egress controls, and reproducible runs in regulated environments.
+   - EyeOfG0d opportunity: turnkey on-prem deployment, offline model options/BYOK routing, strict data egress controls, and reproducible runs in regulated environments.
 
 5. **Bridging manual proxy workflows and autonomous testing**
    - Gap: practitioners rely on Burp/Caido for nuanced manual work; autonomous tools can miss business logic/context or be hard to steer.
-   - ARTEX opportunity: human-on-the-loop controls over the same proxy/graph/evidence substrate (seed sessions, constrain scope, replay/branch explorations, promote manual findings into automated retests).
+   - EyeOfG0d opportunity: human-on-the-loop controls over the same proxy/graph/evidence substrate (seed sessions, constrain scope, replay/branch explorations, promote manual findings into automated retests).
 - **PentestGPT:** reliability gaps in long-horizon/autonomous runs, context/planning brittleness, setup/provider friction, and need for human validation; research indicates limited fully E2E success under hard conditions. Sources: https://arxiv.org/html/2602.17622v1 https://blog.ostorlab.co/9-open-source-ai-pentest-tools-2026.html https://www.penligent.ai/hackinglabs/pentest-gpt-in-2026-from-clever-prompts-to-verified-findings
 - **CAI (Alias Robotics):** framework (not turnkey) requires expertise/integration; outcomes depend on chosen models/scaffolds/tools; operational maturity may be heavier lift for small teams. Sources: https://aliasrobotics.com/cai.php https://github.com/aliasrobotics/CAI
 - **Strix:** young/rapidly evolving codebase and product surface; hosted/commercial pricing/details less standardized publicly; autonomous claims require trust in validation quality; self-hosting needs LLM/tooling ops. Sources: https://github.com/usestrix/strix https://strix.ai/ https://www.strix.ai/blog/best-ai-pentesting-tools

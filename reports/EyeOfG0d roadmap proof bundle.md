@@ -1,6 +1,6 @@
-# ARTEX roadmap: a new feature proposal
+# EyeOfG0d roadmap: a new feature proposal
 
-**Question:** Which new feature should ARTEX build next, given the goal of growing the open-source
+**Question:** Which new feature should EyeOfG0d build next, given the goal of growing the open-source
 project, a 1–2 month budget, and a desire to strengthen autonomy quality, trust/evidence, integration,
 compliance and platform-ops at once?
 
@@ -10,7 +10,7 @@ compliance and platform-ops at once?
 
 ## 1. Why this is the right answer
 
-Every piece of research pointed at the same asymmetry. ARTEX's differentiator is that it *binds every
+Every piece of research pointed at the same asymmetry. EyeOfG0d's differentiator is that it *binds every
 finding to the traffic that proves it* — and that is real in the code: content-addressed blobs,
 sha256-verified on read (`evidence/store.go:120,182`), verbatim-quote verification that fails closed
 (`server/finding_verification.go:154,162`), retests with `reproduced/fixed/inconclusive`
@@ -33,20 +33,20 @@ a `md-zip` folder (`server/server.go:2435`) that a recipient has to *trust*. Mea
 - **The OSS field has continuity risk.** `aliasrobotics/cai` is already archived and read-only, with a
   successor named. Flexibly-hosted OSS agents are plentiful; durable, verifiable ones are not.
 
-And the growth argument, which matters most given the goal: **a stranger cannot try ARTEX today.** It
+And the growth argument, which matters most given the goal: **a stranger cannot try EyeOfG0d today.** It
 needs Postgres, an LLM key that costs money, and a target with legal exposure, and then a scan that takes
 tens of minutes. There is no five-minute moment. A self-verifying bundle creates one — you can verify a
 recorded engagement offline, in seconds, with no key and no target.
 
 ## 2. What it is, concretely
 
-**A `.artex` bundle** — a single file (or directory) containing an engagement's findings, the bound
+**A `.eyeofg0d` bundle** — a single file (or directory) containing an engagement's findings, the bound
 traffic evidence, the coverage ledger, and a manifest of sha256 digests.
 
 ```
-artex bundle export --task 42 > acme-web-2026-11.artex
-artex bundle verify acme-web-2026-11.artex      # green: 47 findings, 312 blobs, all hashes valid
-artex bundle diff q3.artex q4.artex             # new / persisting / resolved / regressed
+eyeofg0d bundle export --task 42 > acme-web-2026-11.eyeofg0d
+eyeofg0d bundle verify acme-web-2026-11.eyeofg0d      # green: 47 findings, 312 blobs, all hashes valid
+eyeofg0d bundle diff q3.eyeofg0d q4.eyeofg0d             # new / persisting / resolved / regressed
 ```
 
 Three properties do the work:
@@ -67,7 +67,7 @@ The bundle is those primitives given a wire format and a verifier.
 | Phase | Work | Effort |
 | --- | --- | --- |
 | **1. Bundle format + export** | Manifest schema, `bundle/` package, export path reusing `StageFindingsExport` | 2 wks |
-| **2. Offline verifier** | `artex bundle verify`, digest recompute, human + `--json` output | 1 wk |
+| **2. Offline verifier** | `eyeofg0d bundle verify`, digest recompute, human + `--json` output | 1 wk |
 | **3. Fingerprint** | `findings.fingerprint` via `db/migrations/0008_*.sql`; pure function over canonicalised inputs | 2 wks |
 | **4. Bundle diff** | Four buckets; refuses `resolved` on an incomplete run | 1.5 wks |
 | **5. SARIF + CI** | SARIF inside the bundle; a GitHub Action that verifies and gates | 1.5 wks |
@@ -116,7 +116,7 @@ strong — PentestGPT v2's difficulty-aware search reports 91% peak on XBOW, Red
 invisible in a screenshot, and **it cannot be verified in this repo** without a benchmark harness. It makes
 the product better and the project no more adopted. Revisit once there is a scoring rig.
 
-**Benchmark harness / published scoreboard.** Highest marketing value of anything on this list — "ARTEX
+**Benchmark harness / published scoreboard.** Highest marketing value of anything on this list — "EyeOfG0d
 scores X on Cybench/AutoPenBench" is a press release. But it is orthogonal to all five axes you picked, it
 costs real money per run, and it is research work rather than product work. **Do it next, not now.**
 
@@ -124,7 +124,7 @@ costs real money per run, and it is research work rather than product work. **Do
 bundle is what makes the diff legible to someone who was not there.
 
 **Full RBAC / SSO / multi-tenancy.** The real gap versus commercial platforms — and the wrong thing now.
-`ARTEX` is a hardcoded username (`server/auth.go:585`), the JWT subject is the constant `"ARTEX"`
+`EyeOfG0d` is a hardcoded username (`server/auth.go:585`), the JWT subject is the constant `"EyeOfG0d"`
 (`server/auth.go:190`), and no role or tenant column exists anywhere. Threading a principal through
 `requireAuth` touches essentially every handler and contradicts the deliberate client-side-auth model
 (`server/webui_embed.go:21`). That is a quarter, and a rewrite of the auth boundary. A cheap slice —
@@ -135,9 +135,9 @@ diminishing returns; the corpus was just expanded and is not the constraint.
 
 ## 7. What success looks like at 2 months
 
-- `artex bundle verify` exists and is referenced in the README quick start
+- `eyeofg0d bundle verify` exists and is referenced in the README quick start
 - A recorded demo bundle ships in the repo and imports into a populated UI with no LLM key
-- `artex bundle diff` answers new/persisting/resolved on two real runs
+- `eyeofg0d bundle diff` answers new/persisting/resolved on two real runs
 - SARIF export lands in a GitHub Action example
 - The bundle format is documented well enough that someone files an issue asking to write a Python verifier
 
@@ -146,5 +146,5 @@ That last bullet is the one that measures whether this grew the project or just 
 ## Sources
 
 Competitive landscape, buyer pain points, agent techniques and regulatory drivers are captured in
-`research_notes/ARTEX roadmap feature proposal/`. Codebase claims are grounded with `file:line`
+`research_notes/EyeOfG0d roadmap feature proposal/`. Codebase claims are grounded with `file:line`
 citations in `codebase-gap-analysis.md`.

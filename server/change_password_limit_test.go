@@ -157,7 +157,7 @@ func TestChangePasswordSuccessResetsCounter(t *testing.T) {
 	}
 
 	w := httptest.NewRecorder()
-	login := httptest.NewRequest("POST", "/api/auth/login", strings.NewReader(`{"username":"ARTEX","password":"correct-horse-2"}`))
+	login := httptest.NewRequest("POST", "/api/auth/login", strings.NewReader(`{"username":"EyeOfG0d","password":"correct-horse-2"}`))
 	login.RemoteAddr = ip
 	s.authLogin(w, login)
 	if w.Code != 200 {

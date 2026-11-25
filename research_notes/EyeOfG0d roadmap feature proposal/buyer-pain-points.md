@@ -1,7 +1,7 @@
 # Buyer pain points & adoption blockers: self-hosted/autonomous security testing (2026)
 
 **Date:** 2026-11-19 (research compiled)
-**Scope:** What drives adoption/renewal of autonomous pentest platforms vs. what kills deals/usage. Focus on self-hosted, model-agnostic, evidence-bound positioning (ARTEX: "autonomous pentesting that keeps its receipts" / findings bound to proving traffic).
+**Scope:** What drives adoption/renewal of autonomous pentest platforms vs. what kills deals/usage. Focus on self-hosted, model-agnostic, evidence-bound positioning (EyeOfG0d: "autonomous pentesting that keeps its receipts" / findings bound to proving traffic).
 **Method:** Web research (vendor analyses, practitioner-oriented publications, product/docs signals, standards/audit guidance). Where possible, separated **stated preferences** (what buyers/vendors say) from **revealed behavior** (survey/market signals, audit expectations, operational constraints).
 
 ## Executive takeaways
@@ -22,7 +22,7 @@
   - Stanford ARTEMIS results cited by Capture the Bug: best autonomous agent had **18% invalid findings**; top human testers had zero invalid in that study context. ([Capture the Bug, 2026](https://capturethebug.xyz/blogs/autonomous-pentesting-false-positives-what-actually-works-2026))
 - **Practitioner demand (evidence quality):** Proof must distinguish *inferred/theoretical* issues from *validated, exploitable* ones. Adayptus recommends asking for the artefact behind a finding (session obtained, file read, token minted) vs. version-banner/CVE inference. ([Adayptus, 2026](https://adayptus.com/blog/autonomous-penetration-testing-market-trends))
 
-### Implications for ARTEX
+### Implications for EyeOfG0d
 - Binding findings to **proving traffic/artifacts** directly addresses the dominant trust blocker (manual revalidation burden, fabricated/unverifiable claims).
 - High-leverage product signals: exploit proof chain, request/response or replay artifacts, confidence/validation state, false-positive suppression via verification-before-ticketing.
 
@@ -35,7 +35,7 @@
   - Synack AI pentesting guide emphasizes evidence capture and human validation before findings count as reportable evidence; scope discipline/guardrails matter for defensible results. ([Synack, 2026](https://synack.com/learning-center/complete-guide-to-ai-pentesting-2026))
   - Adayptus: ability to **re-run a single path on demand** is core to remediation workflow; retest/verification loops are where risk is actually reduced. ([Adayptus, 2026](https://adayptus.com/blog/autonomous-penetration-testing-market-trends))
 
-### Implications for ARTEX
+### Implications for EyeOfG0d
 - **Deterministic replay / reproducible PoE** is a differentiator for both engineering trust and audit defensibility.
 - Must support: evidence packages per finding, retest state/history, reproducibility metadata (target state, auth context where safe, steps/traffic), and exportable audit trails.
 
@@ -52,7 +52,7 @@
 - Manual triage/report handling consumes security capacity; Whitespots frames large time loss from siloed tools and manual validation/triage in enterprise rollouts (vendor case framing). ([Whitespots](https://whitespots.io))
 - Without CI/CD and issue-tracker hooks, continuous/autonomous testing degrades into periodic reports, undermining renewal value.
 
-### Implications for ARTEX
+### Implications for EyeOfG0d
 - **Must-have (MVP for adoption/renewal):** Jira (or equivalent ticketing), webhooks + JSON export, CI/CD-friendly API/CLI triggers & gating hooks, GitHub/GitLab issue/PR integration, SARIF export for code-scanning ecosystems.
 - **High-value:** Slack/Teams notifications (validated findings only), SIEM/syslog/event export, SSO-aware audit/event logs.
 
@@ -65,7 +65,7 @@
 - **Lifecycle ops:** Predictable **upgrade paths**, migration/rollback guidance, **backup/restore** of findings/evidence/config, and audit logs. (Operational necessities for self-hosted platforms; absence creates security/compliance risk and admin toil.)
 - **Safety & governance:** Scope enforcement, rate limits, exclusion lists, abort controls, and action logs are critical for production-safe autonomous testing. ([Adayptus](https://adayptus.com/blog/autonomous-penetration-testing-market-trends); [Synack](https://synack.com/learning-center/complete-guide-to-ai-pentesting-2026))
 
-### Implications for ARTEX
+### Implications for EyeOfG0d
 - For self-hosted buyers, ship **SSO/SAML, RBAC/project isolation, auditable admin actions, backup/restore docs & tooling, signed/versioned upgrades with rollback notes**, and explicit **offline/air-gapped** deployment guidance.
 - Model-agnostic architecture should include **policy controls for model endpoints/data egress** to satisfy residency and confidentiality constraints.
 
@@ -82,7 +82,7 @@
 - **Model routing/policy** (cheaper/local models for recon, gated spend for exploitation/validation) and caching/dedup to avoid redundant analysis
 - Predictable licensing + transparent infra/LLM cost attribution for self-hosted deployments
 
-### Implications for ARTEX
+### Implications for EyeOfG0d
 - Cost governance is an adoption/renewal feature: provide **budget caps, usage dashboards, and policy-based model selection** aligned with "receipts" (spend tied to validated outcomes).
 
 ## 6) Reporting (usable for client/auditor vs. data dump)
@@ -93,7 +93,7 @@
 - **Lifecycle traceability:** remediation ownership/timelines, retest results, status history, and mapping to frameworks/controls where relevant (PCI DSS, SOC 2, ISO 27001, etc.). ([Synack](https://synack.com/learning-center/what-evidence-do-auditors-expect-from-penetration-testing))
 - **Signal over volume:** prioritize proven, reachable paths over long inferred lists; reduce duplicate/noisy findings. ([Adayptus](https://adayptus.com/blog/autonomous-penetration-testing-market-trends); [Whitespots](https://whitespots.io))
 
-### Implications for ARTEX
+### Implications for EyeOfG0d
 - Reports should be **artifact-centric** (the "receipt" is the core object), exportable (PDF/HTML/JSON/SARIF as applicable), and defensible for auditors and actionable for engineers.
 
 ## 7) Why autonomous pentest tools stall after a pilot
@@ -106,9 +106,9 @@
 - **Coverage mismatch (revealed):** Autonomy handles scalable/repeatable classes well but misses business logic/complex auth chains; pilots disappoint if buyers expected full human-parity depth. ([Adayptus](https://adayptus.com/blog/autonomous-penetration-testing-market-trends); [Capture the Bug](https://capturethebug.xyz/blogs/autonomous-pentesting-false-positives-what-actually-works-2026))
 - **Cost/ops surprises (revealed/stated risk):** Unpredictable token/runtime costs and self-hosting overhead (upgrades, access control, backups) slow expansion from pilot to program.
 
-## ARTEX-oriented synthesis
+## EyeOfG0d-oriented synthesis
 
-| Buyer need | Evidence-backed must-have | ARTEX advantage to emphasize |
+| Buyer need | Evidence-backed must-have | EyeOfG0d advantage to emphasize |
 | --- | --- | --- |
 | Trust | Verified exploitability, PoE artifacts, low-noise validated output | Findings bound to proving traffic ("receipts") |
 | Auditability | Repro steps, retest history, control mapping, audit logs | Deterministic/replayable evidence chain |

@@ -1,6 +1,7 @@
 ---
 name: web3-playbook
 description: "Smart contracts and on-chain systems: Solidity/EVM attack classes (reentrancy, access control, delegatecall, oracle manipulation, flash loans) and a Foundry-based audit workflow. Two references."
+mcps: ScopeSentry, browser
 ---
 
 # Web3 playbook (index)

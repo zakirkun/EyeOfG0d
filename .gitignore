@@ -32,13 +32,13 @@ Thumbs.db
 .claude/
 
 # single-binary artifact with embedded frontend
-/artex
+/eyeofg0d
 # intermediate artifacts left next to the executable by one-click update (staging file / backup / failed version / upgrade marker)
-/artex.new
-/artex.new.sha256
-/artex.old
-/artex.failed
-/artex.upgrade.json
+/eyeofg0d.new
+/eyeofg0d.new.sha256
+/eyeofg0d.old
+/eyeofg0d.failed
+/eyeofg0d.upgrade.json
 /server/webui/dist/
 /dist/
 

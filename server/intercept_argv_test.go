@@ -3,7 +3,7 @@ package server
 import (
 	"testing"
 
-	"github.com/Autumn-27/artex/intercept"
+	"github.com/zakirkun/EyeOfG0d/intercept"
 )
 
 func TestValidateArgvRuleReq(t *testing.T) {
