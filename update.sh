@@ -36,6 +36,21 @@ update_docker(){
     || die "docker / docker compose not detected; install and deploy with ./install.sh first"
   [ -f .env ] || die ".env not found; run ./install.sh first to complete the initial deployment"
 
+  # Refuse to start on a pre-rename .env: the old ARTEX_* names are no longer read, so
+  # the app would silently come up on defaults and fail to reach its database.
+  if grep -qE '^[[:space:]]*ARTEX_' .env 2>/dev/null; then
+    cat >&2 <<'RENAME'
+[!] .env still uses ARTEX_* names, which this version no longer reads.
+    Rename them first, or the app starts on defaults and cannot reach its database:
+      sed -i 's/^ARTEX_/EYEOFG0D_/' .env
+    Also rename the PostgreSQL role and database in place (data is kept):
+      ALTER ROLE artex RENAME TO eyeofg0d;
+      ALTER DATABASE artex RENAME TO eyeofg0d;
+    See the 0.7.0 "Breaking changes" section in CHANGELOG.md.
+RENAME
+    die "aborting: .env was not migrated"
+  fi
+
   # Touch only eyeofg0d: postgres is pinned to 16-alpine and does not need upgrading along
   # (pulling it wastes bandwidth, and a major version bump risks compatibility). eyeofg0d
   # declares depends_on postgres, so an up with the service name starts pg if needed and leaves a running one untouched.
